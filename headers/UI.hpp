@@ -11,10 +11,12 @@ class UI
 {
     private:
         sf::RectangleShape minimapBack;
-        sf::RectangleShape background1;
-        sf::RectangleShape background2;
+        sf::RectangleShape outline;
+        sf::RectangleShape background;
+        sf::View oldView;
+        sf::View minimapView;
     public:
-        void drawBackground(sf::RenderWindow& window);
+        void drawBackground(sf::RenderWindow& window, float currentScreenWidth, float currentScreenHeight);
         void drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects);
       
 };

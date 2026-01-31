@@ -6,26 +6,24 @@
 class Rectangle : public Object2D
 {
     private:
-        Point2D positionAngle;
         float width;
-        float height;
+        float length;
 
-        void updateAngle();
+        void updateAngle() override final;
 
     public:
-        Rectangle(const Point2D& positionCenter, float width, float height, sf::Color color);
+        Rectangle(const Point2D& positionCenter, float width, float length, float objectHeight, sf::Color color, ObjectType objectType);
         ~Rectangle() override = default;
 
         bool isInside(Point2D point) override;
+        void drawOnMinimap(sf::RenderWindow& window) override;
 
         void setPositionCenter(const Point2D& positionCenter) override;
         void setWidth(float width);
-        void setHeight(float height);
+        void setLength(float length);
 
         float getWidth() const;
-        float getHeight() const;
+        float getLength() const;
         const Point2D& getPositionAngle() const;
-
-        void drawOnMinimap(sf::RenderWindow& window) override;
 
 };

@@ -1,24 +1,39 @@
 #include "../headers/UI.hpp"
 
-void UI::drawBackground(sf::RenderWindow& window){
-    background1.setSize(sf::Vector2f(SCREEN_SIZE_X, SCREEN_SIZE_Y - MINIMAP_SIZE));
-    background1.setPosition(0, MINIMAP_SIZE);
-    background1.setFillColor(BACKGROUND_COLOR);
-    window.draw(background1);
-
-    background2.setSize(sf::Vector2f(SCREEN_SIZE_X - MINIMAP_SIZE, SCREEN_SIZE_Y));
-    background2.setPosition(MINIMAP_SIZE, 0);
-    background2.setFillColor(BACKGROUND_COLOR);
-    window.draw(background2);
+void UI::drawBackground(sf::RenderWindow& window, float currentScreenWidth, float currentScreenHeight){
+    background.setSize(sf::Vector2f(currentScreenWidth, currentScreenHeight));
+    background.setPosition(0, 0);
+    background.setFillColor(BACKGROUND_COLOR);
+    window.draw(background);
 }
 
-void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects){
-    minimapBack.setSize(sf::Vector2f(SCREEN_SIZE_X, SCREEN_SIZE_Y));
+void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects) {
+    oldView = window.getView();
+
+    minimapView.reset(sf::FloatRect(0, 0, MINIMAP_AREA_SIZE, MINIMAP_AREA_SIZE));
+
+    float vWidth = (float)MINIMAP_SIZE / window.getSize().x;
+    float vHeight = (float)MINIMAP_SIZE / window.getSize().y;
+    
+    minimapView.setViewport(sf::FloatRect(0.0f, 0.0f, vWidth, vHeight));
+
+    window.setView(minimapView);
+
+    minimapBack.setSize(sf::Vector2f(MINIMAP_AREA_SIZE, MINIMAP_AREA_SIZE));
     minimapBack.setPosition(0, 0);
     minimapBack.setFillColor(MINIMAP_BACK_COLOR);
     window.draw(minimapBack);
 
-    for(int i = 0; i < arrayObjects.size(); i++){
-        arrayObjects[i]->drawOnMinimap(window);
+    for (auto* obj : arrayObjects) {
+        obj->drawOnMinimap(window);
     }
+
+    window.setView(oldView);
+
+    outline.setSize(sf::Vector2f(MINIMAP_SIZE, MINIMAP_SIZE));
+    outline.setPosition(0, 0);
+    outline.setFillColor(sf::Color::Transparent);
+    outline.setOutlineThickness(MINIMAP_OUTLINE_THICKNESS);
+    outline.setOutlineColor(MINIMAP_OUTLINE_COLOR);
+    window.draw(outline);
 }

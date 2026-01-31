@@ -2,6 +2,7 @@
 
 enum class ObjectType
 {
-    Rectangle,
-    Circle
+    RectangleWall,
+    CircleWall,
+    Player
 };

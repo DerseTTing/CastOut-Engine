@@ -4,8 +4,9 @@ World::World()
     : window(sf::VideoMode(SCREEN_SIZE_X, SCREEN_SIZE_Y), "CastOut"){
     view = window.getDefaultView();
 
-    minimapSize = SCREEN_SIZE_Y * MINIMAP_SHARE_SIZE;
-    GenerationMap();
+    currentScreenWidth = SCREEN_SIZE_X;
+    currentScreenHeight = SCREEN_SIZE_Y;
+    generationMap();
 }
 
 World::~World() {
@@ -15,27 +16,38 @@ World::~World() {
 }
 
 void World::runWorld(){
-
-
     while(window.isOpen()){
         while (window.pollEvent(event)){
             processingEvent();
 
         }
+        deltaTime = clock.restart().asSeconds();
+        updateObjects(deltaTime);
+        castRay(player->getPositionCenter(), player->getDirectionGaze());
         drawFrame();
     }
 }
 
-void World::GenerationMap(){
-    sf::Color color = WALL_COLOR;
-    for(int i = 0; i < WALL_QUANTITY; i++){
+void World::generationMap(){
+    for(int i = 0; i < WALL_RECTANGLE_QUANTITY; i++){
         float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
         float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
-        int width = getRandomNumber(WALL_SIZE_MIN, WALL_SIZE_MAX);
-        int height = getRandomNumber(WALL_SIZE_MIN, WALL_SIZE_MAX);
-        Rectangle* ptrObj = new Rectangle(Point2D(posX,posY), width, height, color);
+        int width = getRandomNumber(WALL_RECTANGLE_SIZE_MIN, WALL_RECTANGLE_SIZE_MAX);
+        int length = getRandomNumber(WALL_RECTANGLE_SIZE_MIN, WALL_RECTANGLE_SIZE_MAX);
+        //Rectangle* ptrObj = new Rectangle(Point2D(posX,posY), width, length, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
+        //arrayObjects.push_back(ptrObj);
+    }
+    for(int i = 0; i < WALL_CIRCLE_QUANTITY; i++){
+        float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
+        float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
+        int radius = getRandomNumber(WALL_CIRCLE_RADIUS_MIN, WALL_CIRCLE_RADIUS_MAX);
+        Circle* ptrObj = new Circle(Point2D(posX,posY), radius, WALL_HEIGHT, WALL_CIRCLE_COLOR, ObjectType::CircleWall);
         arrayObjects.push_back(ptrObj);
     }
+
+    float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
+    float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
+    player = new Player(Point2D(posX,posY), PLAYER_RADIUS, WALL_HEIGHT, PLAYER_COLOR, ObjectType::Player);
 }
 
 void World::processingEvent(){
@@ -49,37 +61,93 @@ void World::processingEvent(){
 void World::drawFrame(){
     window.clear();
 
+    userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
+    drawRayCastResult(rayCastResult);
     userInterface.drawMinimap(window, arrayObjects);
-    userInterface.drawBackground(window);
 
     window.display();
 }
 
-void World::resizedEvent(){
-    float currentWidth = event.size.width;
-    float currentHeight = event.size.height;
 
-    float defaultRatio = (float)SCREEN_SIZE_X / (float)SCREEN_SIZE_Y;
-    float currentRatio = currentWidth / currentHeight;
-
-    float posX = 0;
-    float posY = 0;
-    float viewWidth = 1.0f;
-    float viewHeight = 1.0f;
-    if(defaultRatio < currentRatio){
-        viewWidth = defaultRatio / currentRatio;
-        posX = (1.0f - viewWidth) / 2.0f;
+void World::updateObjects(float deltaTime){
+    for(int i = 0; i < arrayObjects.size(); i++){
+        arrayObjects[i]->updateObject(deltaTime);
     }
-    else{
-        viewHeight = currentRatio / defaultRatio;
-        posY = (1.0f - viewHeight) / 2.0f;
-    }
-    view.setViewport(sf::FloatRect(posX, posY, viewWidth, viewHeight));
-    window.setView(view);
-
-    minimapSize = currentHeight * MINIMAP_SHARE_SIZE;
 }
 
+void World::castRay(Point2D startPointRay, float directionGaze){
+    rayCastResult.clear();
+    float currentAngle = player->getDirectionGaze() - PLAYER_VIEWING_ANGLE/2;
+    float stepAngle = PLAYER_VIEWING_ANGLE / currentScreenWidth * RAY_FREQUENCY_IN_PIXEL;
+    for(int i = 0; i < currentScreenWidth; i += RAY_FREQUENCY_IN_PIXEL){
+        float minDistance = MAX_FLOAT;
+        float minDistanceObjectHeight;
+        sf::Color minDistanceObjectColor;
+        float posX_directionVector = cos(currentAngle * PI / 180);
+        float posY_directionVector = sin(currentAngle * PI / 180);
+        for(int j = 0; j < arrayObjects.size();j++){
+            if(arrayObjects[j]->getObjectType() != ObjectType::Player){
+                float dist = arrayObjects[j]->intersectRay(player->getPositionCenter(), currentAngle, Point2D(posX_directionVector, posY_directionVector));
+                if(minDistance > dist && dist != -1.0f){
+                    minDistance = dist;
+                    minDistanceObjectHeight = arrayObjects[j]->getObjectHeight();
+                    minDistanceObjectColor = arrayObjects[j]->getColor();
+                }
+            }
+        }
+        float differentAngle = currentAngle - player->getDirectionGaze();
+        minDistance *= cos(differentAngle * (PI / 180.0f));
+        RayHit hit;
+        if(minDistance != MAX_FLOAT){
+            hit.distance = minDistance;
+            hit.objectHeight = minDistanceObjectHeight;
+            hit.color = minDistanceObjectColor;
+            hit.hit = true;
+        }
+        else
+            hit.hit = false;
+
+        rayCastResult.push_back(hit);
+
+        currentAngle += stepAngle;
+    }
+}
+
+void World::drawRayCastResult(const vector<RayHit>& rayCastResult){
+    sf::RectangleShape rectangle;
+    float distanceToProjection = (currentScreenHeight / 2.0f) / FOV_TANGENT;
+    for(int i = 0; i < rayCastResult.size(); i++){
+        if(rayCastResult[i].hit){
+            float objectHeight = rayCastResult[i].objectHeight;
+            float distance = rayCastResult[i].distance;
+            if (distance < 0.1f) distance = 0.1f;
+            float heightStrip = objectHeight * distanceToProjection / distance;
+            float stepStripX = currentScreenWidth / rayCastResult.size();
+
+            sf::Color color = rayCastResult[i].color;
+            float fogFactor = distance / PLAYER_MAX_DROW_DISTANCE;
+            if(fogFactor > 1) fogFactor = 1;
+
+            color.r = color.r * (1-fogFactor);
+            color.b = color.b * (1-fogFactor);
+            color.g = color.g * (1-fogFactor);
+            color.a = color.a * (1-fogFactor);
+
+            rectangle.setSize(sf::Vector2f(stepStripX, heightStrip));
+            rectangle.setPosition(i * stepStripX, (currentScreenHeight - heightStrip)/2);
+            rectangle.setFillColor(color);
+            window.draw(rectangle);
+        }
+    }
+}
+
+void World::resizedEvent(){
+    currentScreenWidth = event.size.width;
+    currentScreenHeight = event.size.height;
+    // Просто обновляем View под новый размер без черных полос
+    view = sf::View(sf::FloatRect(0, 0, currentScreenWidth, currentScreenHeight));
+    window.setView(view);
+}
 
 int World::getRandomNumber(int min, int max) {
     static std::random_device rd;

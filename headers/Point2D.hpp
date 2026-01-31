@@ -14,7 +14,10 @@ class Point2D
     void setY(float y);
     void setPoint(float x, float y);
 
-    const float getX() const;
-    const float getY() const;
+    float getX() const;
+    float getY() const;
 
+    Point2D operator+(const Point2D& point2) const;
+    Point2D operator-(const Point2D& point2) const;
+    Point2D operator*(float constNumber) const;
 };

@@ -25,11 +25,32 @@ void Point2D::setPoint(float x, float y){
 }
 
 
-const float Point2D::getX() const{
+float Point2D::getX() const{
     return x;
 }
 
-const float Point2D::getY() const{
+float Point2D::getY() const{
     return y;
 }
 
+
+Point2D Point2D::operator+(const Point2D& point2) const{
+    Point2D newPoint;
+    newPoint.setX(getX() + point2.getX());
+    newPoint.setY(getY() + point2.getY());
+    return newPoint;
+}
+
+Point2D Point2D::operator-(const Point2D& point2) const{
+    Point2D newPoint;
+    newPoint.setX(getX() - point2.getX());
+    newPoint.setY(getY() - point2.getY());
+    return newPoint;
+}
+
+Point2D Point2D::operator*(float constNumber) const{
+    Point2D newPoint;
+    newPoint.setX(getX() * constNumber);
+    newPoint.setY(getY() * constNumber);
+    return newPoint;
+}
