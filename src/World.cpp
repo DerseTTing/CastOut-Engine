@@ -4,6 +4,12 @@ World::World()
     : window(sf::VideoMode(SCREEN_SIZE_X, SCREEN_SIZE_Y), "CastOut"){
     view = window.getDefaultView();
 
+    if(font.loadFromFile("fonts/ArchiveUkr.ttf")){
+        fpsText.setFont(font);
+        fpsText.setCharacterSize(15);
+        fpsText.setFillColor(sf::Color::Blue);
+    }
+
     currentScreenWidth = SCREEN_SIZE_X;
     currentScreenHeight = SCREEN_SIZE_Y;
     generationMap();
@@ -34,8 +40,8 @@ void World::generationMap(){
         float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
         int width = getRandomNumber(WALL_RECTANGLE_SIZE_MIN, WALL_RECTANGLE_SIZE_MAX);
         int length = getRandomNumber(WALL_RECTANGLE_SIZE_MIN, WALL_RECTANGLE_SIZE_MAX);
-        //Rectangle* ptrObj = new Rectangle(Point2D(posX,posY), width, length, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
-        //arrayObjects.push_back(ptrObj);
+        Rectangle* ptrObj = new Rectangle(Point2D(posX,posY), width, length, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
+        arrayObjects.push_back(ptrObj);
     }
     for(int i = 0; i < WALL_CIRCLE_QUANTITY; i++){
         float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
@@ -48,6 +54,7 @@ void World::generationMap(){
     float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
     float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
     player = new Player(Point2D(posX,posY), PLAYER_RADIUS, WALL_HEIGHT, PLAYER_COLOR, ObjectType::Player);
+    arrayObjects.push_back(player);
 }
 
 void World::processingEvent(){
@@ -64,6 +71,7 @@ void World::drawFrame(){
     userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
     drawRayCastResult(rayCastResult);
     userInterface.drawMinimap(window, arrayObjects);
+    updateFPS();
 
     window.display();
 }
@@ -77,9 +85,11 @@ void World::updateObjects(float deltaTime){
 
 void World::castRay(Point2D startPointRay, float directionGaze){
     rayCastResult.clear();
-    float currentAngle = player->getDirectionGaze() - PLAYER_VIEWING_ANGLE/2;
-    float stepAngle = PLAYER_VIEWING_ANGLE / currentScreenWidth * RAY_FREQUENCY_IN_PIXEL;
     for(int i = 0; i < currentScreenWidth; i += RAY_FREQUENCY_IN_PIXEL){
+        float screenX = 2.0f * i / (float)currentScreenWidth - 1.0f;
+        float relativeAngle = atanf(screenX * FOV_TANGENT) * 180.0f / PI;;
+        float currentAngle = player->getDirectionGaze() + relativeAngle;
+
         float minDistance = MAX_FLOAT;
         float minDistanceObjectHeight;
         sf::Color minDistanceObjectColor;
@@ -108,8 +118,6 @@ void World::castRay(Point2D startPointRay, float directionGaze){
             hit.hit = false;
 
         rayCastResult.push_back(hit);
-
-        currentAngle += stepAngle;
     }
 }
 
@@ -125,13 +133,11 @@ void World::drawRayCastResult(const vector<RayHit>& rayCastResult){
             float stepStripX = currentScreenWidth / rayCastResult.size();
 
             sf::Color color = rayCastResult[i].color;
-            float fogFactor = distance / PLAYER_MAX_DROW_DISTANCE;
-            if(fogFactor > 1) fogFactor = 1;
+            float fogFactor = 1.0f - expf(-distance * DENSITY);;
 
-            color.r = color.r * (1-fogFactor);
-            color.b = color.b * (1-fogFactor);
-            color.g = color.g * (1-fogFactor);
-            color.a = color.a * (1-fogFactor);
+            color.r = color.r * (1 - fogFactor) + BACKGROUND_COLOR.r * fogFactor;
+            color.b = color.b * (1 - fogFactor) + BACKGROUND_COLOR.b * fogFactor;
+            color.g = color.g * (1 - fogFactor) + BACKGROUND_COLOR.g * fogFactor;
 
             rectangle.setSize(sf::Vector2f(stepStripX, heightStrip));
             rectangle.setPosition(i * stepStripX, (currentScreenHeight - heightStrip)/2);
@@ -162,3 +168,22 @@ float World::getRandomNumber(float min, float max) {
     std::uniform_real_distribution<float> dis(min, max);
     return dis(gen);
 }
+
+void World::updateFPS() {
+
+    static int frameCount = 0;
+    static sf::Clock fpsClock;
+    frameCount++;
+
+    if (fpsClock.getElapsedTime().asMilliseconds() >= 100) {
+        currentFPS = frameCount / (fpsClock.restart().asMilliseconds() / 1000.0f);
+        frameCount = 0;
+    }
+
+    fpsText.setPosition(currentScreenWidth - 62, 5);
+    fpsText.setString("FPS: " + std::to_string(static_cast<int>(currentFPS)));
+
+    window.draw(fpsText);
+
+}
+

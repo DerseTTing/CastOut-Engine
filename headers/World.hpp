@@ -18,11 +18,15 @@ class World
         sf::Event event;
         sf::View view;
         sf::Clock clock;
+        sf::Font font;
+        sf::Text fpsText;
 
         UI userInterface;
         Player* player;
         float currentScreenWidth;
         float currentScreenHeight;
+
+        float currentFPS;
 
         struct RayHit {
             float distance;
@@ -55,5 +59,9 @@ class World
         
         float getRandomNumber(float min, float max);
         int getRandomNumber(int min, int max);
+
+        void updateFPS();
+        void drawFPS();
+
 
 };

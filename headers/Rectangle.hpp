@@ -16,6 +16,7 @@ class Rectangle : public Object2D
         ~Rectangle() override = default;
 
         bool isInside(Point2D point) override;
+        float intersectRay(Point2D startPointRay, float angle, Point2D directionVector) override;
         void drawOnMinimap(sf::RenderWindow& window) override;
 
         void setPositionCenter(const Point2D& positionCenter) override;
