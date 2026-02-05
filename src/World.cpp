@@ -4,12 +4,6 @@ World::World()
     : window(sf::VideoMode(SCREEN_SIZE_X, SCREEN_SIZE_Y), "CastOut"){
     view = window.getDefaultView();
 
-    if(font.loadFromFile("fonts/ArchiveUkr.ttf")){
-        fpsText.setFont(font);
-        fpsText.setCharacterSize(15);
-        fpsText.setFillColor(sf::Color::Blue);
-    }
-
     currentScreenWidth = SCREEN_SIZE_X;
     currentScreenHeight = SCREEN_SIZE_Y;
     generationMap();
@@ -28,8 +22,11 @@ void World::runWorld(){
 
         }
         deltaTime = clock.restart().asSeconds();
-        updateObjects(deltaTime);
+
         castRay(player->getPositionCenter(), player->getDirectionGaze());
+        updateObjects();
+        updateFPS();
+
         drawFrame();
     }
 }
@@ -69,17 +66,17 @@ void World::drawFrame(){
     window.clear();
 
     userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
-    drawRayCastResult(rayCastResult);
-    userInterface.drawMinimap(window, arrayObjects);
-    updateFPS();
+    userInterface.drawRayCastResult(window, rayCastResult, currentScreenWidth, currentScreenHeight);
+    userInterface.drawMinimap(window, arrayObjects, rayCastResult, player->getPositionCenter());
+    userInterface.drawFPS(window, currentFPS, currentScreenWidth);
 
     window.display();
 }
 
 
-void World::updateObjects(float deltaTime){
+void World::updateObjects(){
     for(int i = 0; i < arrayObjects.size(); i++){
-        arrayObjects[i]->updateObject(deltaTime);
+        arrayObjects[i]->updateObject(arrayObjects, deltaTime);
     }
 }
 
@@ -87,70 +84,58 @@ void World::castRay(Point2D startPointRay, float directionGaze){
     rayCastResult.clear();
     for(int i = 0; i < currentScreenWidth; i += RAY_FREQUENCY_IN_PIXEL){
         float screenX = 2.0f * i / (float)currentScreenWidth - 1.0f;
-        float relativeAngle = atanf(screenX * FOV_TANGENT) * 180.0f / PI;;
+        float relativeAngle = atanf(screenX * FOV_TANGENT) * RAD_TO_DEG;
         float currentAngle = player->getDirectionGaze() + relativeAngle;
 
-        float minDistance = MAX_FLOAT;
-        float minDistanceObjectHeight;
-        sf::Color minDistanceObjectColor;
-        float posX_directionVector = cos(currentAngle * PI / 180);
-        float posY_directionVector = sin(currentAngle * PI / 180);
-        for(int j = 0; j < arrayObjects.size();j++){
-            if(arrayObjects[j]->getObjectType() != ObjectType::Player){
-                float dist = arrayObjects[j]->intersectRay(player->getPositionCenter(), currentAngle, Point2D(posX_directionVector, posY_directionVector));
-                if(minDistance > dist && dist != -1.0f){
-                    minDistance = dist;
-                    minDistanceObjectHeight = arrayObjects[j]->getObjectHeight();
-                    minDistanceObjectColor = arrayObjects[j]->getColor();
-                }
-            }
-        }
-        float differentAngle = currentAngle - player->getDirectionGaze();
-        minDistance *= cos(differentAngle * (PI / 180.0f));
-        RayHit hit;
-        if(minDistance != MAX_FLOAT){
-            hit.distance = minDistance;
-            hit.objectHeight = minDistanceObjectHeight;
-            hit.color = minDistanceObjectColor;
-            hit.hit = true;
-        }
-        else
-            hit.hit = false;
+        Point2D directionVector(cos(currentAngle * DEG_TO_RAD), sin(currentAngle * DEG_TO_RAD));
+        
+        RayHit hit = findClosestIntersection(startPointRay, currentAngle, directionVector);
 
         rayCastResult.push_back(hit);
     }
 }
+RayHit World::findClosestIntersection(Point2D startPoint, float currentAngle, Point2D& directionVector){
+    float minDistance = MAX_FLOAT;
+    Object2D* closestObject = nullptr;
 
-void World::drawRayCastResult(const vector<RayHit>& rayCastResult){
-    sf::RectangleShape rectangle;
-    float distanceToProjection = (currentScreenHeight / 2.0f) / FOV_TANGENT;
-    for(int i = 0; i < rayCastResult.size(); i++){
-        if(rayCastResult[i].hit){
-            float objectHeight = rayCastResult[i].objectHeight;
-            float distance = rayCastResult[i].distance;
-            if (distance < 0.1f) distance = 0.1f;
-            float heightStrip = objectHeight * distanceToProjection / distance;
-            float stepStripX = currentScreenWidth / rayCastResult.size();
-
-            sf::Color color = rayCastResult[i].color;
-            float fogFactor = 1.0f - expf(-distance * DENSITY);;
-
-            color.r = color.r * (1 - fogFactor) + BACKGROUND_COLOR.r * fogFactor;
-            color.b = color.b * (1 - fogFactor) + BACKGROUND_COLOR.b * fogFactor;
-            color.g = color.g * (1 - fogFactor) + BACKGROUND_COLOR.g * fogFactor;
-
-            rectangle.setSize(sf::Vector2f(stepStripX, heightStrip));
-            rectangle.setPosition(i * stepStripX, (currentScreenHeight - heightStrip)/2);
-            rectangle.setFillColor(color);
-            window.draw(rectangle);
+    for(int i = 0; i < arrayObjects.size();i++){
+            if(arrayObjects[i]->getObjectType() != ObjectType::Player){
+                float dist = arrayObjects[i]->intersectRay(startPoint, directionVector);
+                if(minDistance > dist && dist != -1.0f){
+                    minDistance = dist;
+                    closestObject = arrayObjects[i];
+                }
+            }
         }
+    return createRayHit(minDistance, currentAngle, closestObject);
+}
+
+RayHit World::createRayHit(float minDistance, float currentAngle, Object2D* closestObject){
+    RayHit hit;
+    if(minDistance != MAX_FLOAT && closestObject != nullptr){
+        hit.distanceWithoutCorrection = minDistance;
+
+        float differentAngle = currentAngle - player->getDirectionGaze();
+        minDistance *= cos(differentAngle * (PI / 180.0f));
+
+        hit.distance = minDistance;
+        hit.closestObject = closestObject;
+        hit.angle = currentAngle;
+        hit.hit = true;
     }
+    else{
+        hit.distanceWithoutCorrection = MINIMAP_AREA_SIZE * 2;
+        hit.angle = currentAngle;
+        hit.closestObject = nullptr;
+        hit.hit = false;
+    }
+
+    return hit;
 }
 
 void World::resizedEvent(){
     currentScreenWidth = event.size.width;
     currentScreenHeight = event.size.height;
-    // Просто обновляем View под новый размер без черных полос
     view = sf::View(sf::FloatRect(0, 0, currentScreenWidth, currentScreenHeight));
     window.setView(view);
 }
@@ -179,11 +164,4 @@ void World::updateFPS() {
         currentFPS = frameCount / (fpsClock.restart().asMilliseconds() / 1000.0f);
         frameCount = 0;
     }
-
-    fpsText.setPosition(currentScreenWidth - 62, 5);
-    fpsText.setString("FPS: " + std::to_string(static_cast<int>(currentFPS)));
-
-    window.draw(fpsText);
-
 }
-

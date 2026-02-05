@@ -1,5 +1,5 @@
 #pragma once
-
+#include <cmath>
 class Point2D
 {
     private:
@@ -16,6 +16,9 @@ class Point2D
 
     float getX() const;
     float getY() const;
+
+    void normalizedVector();
+    float getLenghtVector();
 
     Point2D operator+(const Point2D& point2) const;
     Point2D operator-(const Point2D& point2) const;

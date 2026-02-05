@@ -10,11 +10,29 @@ Circle::Circle(const Point2D& positionCenter, float radius, float objectHeight, 
     updateAngle();
 }
 
-bool Circle::isInside(Point2D point){
+Point2D Circle::distanceToObject(Point2D point, float playerRadius){
+    float vectorX = point.getX() - positionCenter.getX();
+    float vectorY = point.getY() - positionCenter.getY();
 
+    float lengthVector = sqrt(vectorX * vectorX + vectorY * vectorY);
+    
+    float totalRadius = radius + playerRadius;
+
+    if (lengthVector < totalRadius) {
+        Point2D direction = Point2D(vectorX, vectorY);
+        
+        if (lengthVector == 0)
+            return Point2D(0, 1) * totalRadius;
+
+        direction.normalizedVector();
+        float overlap = totalRadius - lengthVector;
+        return direction * overlap;
+    }
+
+    return Point2D(0, 0);
 }
 
-float Circle::intersectRay(Point2D startPointRay, float angle, Point2D directionVector){
+float Circle::intersectRay(Point2D startPointRay, Point2D directionVector){
     float posX_directionVector = directionVector.getX();
     float posY_directionVector = directionVector.getY();
 
@@ -32,7 +50,7 @@ float Circle::intersectRay(Point2D startPointRay, float angle, Point2D direction
 
     float distanceReturn = sqrt(radius*radius - perpendicularSquared);
     float distToCircle = tca - distanceReturn;
-
+    if(distToCircle < 0) return -1.0f;
     return distToCircle;
 }
 

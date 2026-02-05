@@ -33,6 +33,22 @@ float Point2D::getY() const{
     return y;
 }
 
+void Point2D::normalizedVector(){
+    float lengthNormalVector = sqrt(getX()*getX() + getY()*getY());
+    float normalVectorNormalizedX = 0;
+    float normalVectorNormalizedY = 0;
+    if (lengthNormalVector != 0.0f){
+        normalVectorNormalizedX = getX() / lengthNormalVector;
+        normalVectorNormalizedY = getY() / lengthNormalVector;
+    }
+
+    setPoint(normalVectorNormalizedX, normalVectorNormalizedY);
+}
+
+float Point2D::getLenghtVector(){
+    return sqrt(x*x + y*y);
+}
+
 
 Point2D Point2D::operator+(const Point2D& point2) const{
     Point2D newPoint;

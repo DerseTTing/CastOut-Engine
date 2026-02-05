@@ -12,12 +12,48 @@ Rectangle::Rectangle(const Point2D& positionCenter, float width, float length, f
 }
 
 
-bool Rectangle::isInside(Point2D point){
+Point2D Rectangle::distanceToObject(Point2D point, float playerRadius){
+  float sideXmin = positionCenter.getX() - width / 2;
+    float sideXmax = positionCenter.getX() + width / 2;
+    float sideYmin = positionCenter.getY() - length / 2;
+    float sideYmax = positionCenter.getY() + length / 2;
 
-    return false;
+    float closestDotX = max(sideXmin, min(point.getX(), sideXmax));
+    float closestDotY = max(sideYmin, min(point.getY(), sideYmax));
+
+    float dx = point.getX() - closestDotX;
+    float dy = point.getY() - closestDotY;
+    float distanceSquared = dx * dx + dy * dy;
+
+    // СЛУЧАЙ 1: Центр игрока СНАРУЖИ прямоугольника (или на самой границе)
+    if (distanceSquared > 0) {
+        float distance = sqrt(distanceSquared);
+        if (distance < playerRadius) {
+            float overlap = playerRadius - distance;
+            return Point2D(dx / distance, dy / distance) * overlap;
+        }
+    } 
+    // СЛУЧАЙ 2: Центр игрока оказался ВНУТРИ прямоугольника
+    else {
+        // Ищем расстояния до всех 4-х граней
+        float distToLeft   = point.getX() - sideXmin;
+        float distToRight  = sideXmax - point.getX();
+        float distToTop    = point.getY() - sideYmin;
+        float distToBottom = sideYmax - point.getY();
+
+        // Находим минимальное расстояние — это кратчайший путь наружу
+        float minDist = min({distToLeft, distToRight, distToTop, distToBottom});
+
+        if (minDist == distToLeft)   return Point2D(-(minDist + playerRadius), 0);
+        if (minDist == distToRight)  return Point2D(minDist + playerRadius, 0);
+        if (minDist == distToTop)    return Point2D(0, -(minDist + playerRadius));
+        if (minDist == distToBottom) return Point2D(0, minDist + playerRadius);
+    }
+
+    return Point2D(0, 0);
 }
 
-float Rectangle::intersectRay(Point2D startPointRay, float angle, Point2D directionVector){
+float Rectangle::intersectRay(Point2D startPointRay, Point2D directionVector){
     float minX = positionCenter.getX() - width/2;
     float maxX = positionCenter.getX() + width/2;
     float minY = positionCenter.getY() - length/2;

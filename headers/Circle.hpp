@@ -13,8 +13,8 @@ class Circle : public Object2D
     public:
         Circle(const Point2D& positionCenter, float radius, float height, sf::Color color, ObjectType objectType);
 
-        bool isInside(Point2D point) override;
-        float intersectRay(Point2D startPointRay, float angle, Point2D directionVector) override;
+        Point2D distanceToObject(Point2D point, float playerRadius) override;
+        float intersectRay(Point2D startPointRay, Point2D directionVector) override;
         void drawOnMinimap(sf::RenderWindow& window) override;
 
         void setPositionCenter(const Point2D& positionCenter) override;

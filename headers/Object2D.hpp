@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Point2D.hpp"
 #include "ObjectType.hpp"
+#include "RayHit.hpp"
 #include <vector>
 #include <cmath>
 using namespace std;
@@ -20,9 +21,9 @@ class Object2D
     public:
         virtual ~Object2D() = default;
         
-        virtual bool isInside(Point2D point) = 0;
-        virtual float intersectRay(Point2D startPointRay, float angle, Point2D directionVector) = 0;
-        virtual void updateObject(float deltaTime) {};
+        virtual Point2D distanceToObject(Point2D point, float playerRadius) = 0;
+        virtual float intersectRay(Point2D startPointRay, Point2D directionVector) = 0;
+        virtual void updateObject(const vector<Object2D*>& arrayObjects, float deltaTime) {};
         virtual void drawOnMinimap(sf::RenderWindow& window) = 0;
 
         virtual void setPositionCenter(const Point2D& positionCenter);

@@ -9,37 +9,11 @@
 #include "Circle.hpp"
 #include "Player.hpp"
 #include "ObjectType.hpp"
+#include "RayHit.hpp"
 using namespace std;
 
 class World
-{
-    private:
-        sf::RenderWindow window;
-        sf::Event event;
-        sf::View view;
-        sf::Clock clock;
-        sf::Font font;
-        sf::Text fpsText;
-
-        UI userInterface;
-        Player* player;
-        float currentScreenWidth;
-        float currentScreenHeight;
-
-        float currentFPS;
-
-        struct RayHit {
-            float distance;
-            sf::Color color;
-            float objectHeight;
-            bool hit;      
-        };
-
-        vector<Object2D*> arrayObjects;
-        vector<RayHit> rayCastResult;
-        float deltaTime;
-
-
+{   
     public:
         World();
         ~World();
@@ -53,15 +27,31 @@ class World
 
         void resizedEvent();
 
-        void updateObjects(float deltaTime);
+        void updateObjects();
         void castRay(Point2D startPointRay, float directionGaze);
-        void drawRayCastResult(const vector<RayHit>& rayCastResult);
         
         float getRandomNumber(float min, float max);
         int getRandomNumber(int min, int max);
 
         void updateFPS();
-        void drawFPS();
 
+    private:
+        sf::RenderWindow window;
+        sf::Event event;
+        sf::View view;
+        sf::Clock clock;
 
+        UI userInterface;
+        Player* player;
+        float currentScreenWidth;
+        float currentScreenHeight;
+
+        float currentFPS;
+
+        vector<Object2D*> arrayObjects;
+        vector<RayHit> rayCastResult;
+        float deltaTime;
+
+        RayHit findClosestIntersection(Point2D startPoint, float currentAngle, Point2D& directionVector);
+        RayHit createRayHit(float minDistance, float currentAngle, Object2D* closestObject);
 };
