@@ -10,8 +10,8 @@ World::World()
 }
 
 World::~World() {
-    for (Object2D* obj : arrayObjects) {
-        delete obj;
+    for (int i = 0; i < arrayObjects.size(); i++) {
+        delete arrayObjects[i];
     }
 }
 
@@ -19,7 +19,6 @@ void World::runWorld(){
     while(window.isOpen()){
         while (window.pollEvent(event)){
             processingEvent();
-
         }
         deltaTime = clock.restart().asSeconds();
 
@@ -31,27 +30,23 @@ void World::runWorld(){
     }
 }
 
-void World::generationMap(){
-    for(int i = 0; i < WALL_RECTANGLE_QUANTITY; i++){
-        float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
-        float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
-        int width = getRandomNumber(WALL_RECTANGLE_SIZE_MIN, WALL_RECTANGLE_SIZE_MAX);
-        int length = getRandomNumber(WALL_RECTANGLE_SIZE_MIN, WALL_RECTANGLE_SIZE_MAX);
-        Rectangle* ptrObj = new Rectangle(Point2D(posX,posY), width, length, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
-        arrayObjects.push_back(ptrObj);
+void World::restartWorld(){
+    for (int i = 0; i < arrayObjects.size(); i++) {
+        delete arrayObjects[i];
     }
-    for(int i = 0; i < WALL_CIRCLE_QUANTITY; i++){
-        float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
-        float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
-        int radius = getRandomNumber(WALL_CIRCLE_RADIUS_MIN, WALL_CIRCLE_RADIUS_MAX);
-        Circle* ptrObj = new Circle(Point2D(posX,posY), radius, WALL_HEIGHT, WALL_CIRCLE_COLOR, ObjectType::CircleWall);
-        arrayObjects.push_back(ptrObj);
-    }
+    arrayObjects.clear();
+    map.clearMap();
+    
+    generationMap();
+}
 
-    float posX = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
-    float posY = getRandomNumber(0.0f, MINIMAP_AREA_SIZE);
-    player = new Player(Point2D(posX,posY), PLAYER_RADIUS, WALL_HEIGHT, PLAYER_COLOR, ObjectType::Player);
-    arrayObjects.push_back(player);
+void World::generationMap(){
+    arrayObjects = map.generationMap();
+
+    for(int i = 0; i < arrayObjects.size(); i++){
+        if(arrayObjects[i]->getObjectType() == ObjectType::Player)
+            player = static_cast<Player*>(arrayObjects[i]);
+    }
 }
 
 void World::processingEvent(){
@@ -59,7 +54,8 @@ void World::processingEvent(){
         window.close();
     if (event.type == sf::Event::Resized)
         resizedEvent();
-        
+    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R)
+        restartWorld();
 }
 
 void World::drawFrame(){
@@ -67,7 +63,7 @@ void World::drawFrame(){
 
     userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
     userInterface.drawRayCastResult(window, rayCastResult, currentScreenWidth, currentScreenHeight);
-    userInterface.drawMinimap(window, arrayObjects, rayCastResult, player->getPositionCenter());
+    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player);
     userInterface.drawFPS(window, currentFPS, currentScreenWidth);
 
     window.display();
@@ -138,20 +134,6 @@ void World::resizedEvent(){
     currentScreenHeight = event.size.height;
     view = sf::View(sf::FloatRect(0, 0, currentScreenWidth, currentScreenHeight));
     window.setView(view);
-}
-
-int World::getRandomNumber(int min, int max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis(min, max);
-    return dis(gen);
-}
-
-float World::getRandomNumber(float min, float max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(min, max);
-    return dis(gen);
 }
 
 void World::updateFPS() {

@@ -44,15 +44,18 @@ void UI::drawBackground(sf::RenderWindow& window, float currentScreenWidth, floa
     window.draw(floor);
 }
 
-void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Point2D& playerPosition) {
+void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player) {
     minimapChangeView(window);
 
     minimapDrawBackground(window);
 
-    minimapDrawPlayerRay(window, rayCastResult, playerPosition);
+    minimapDrawPlayerRay(window, rayCastResult, player);
 
-    for (int i = 0; i < arrayObjects.size(); i++) 
-        arrayObjects[i]->drawOnMinimap(window);
+    player.drawOnMinimap(window);
+    for (int i = 0; i < arrayObjects.size(); i++){
+        if(arrayObjects[i]->getObjectType() != ObjectType::Player)
+            arrayObjects[i]->drawOnMinimap(window);
+    }
 
     window.setView(oldView);
 
@@ -75,7 +78,8 @@ void UI::minimapDrawBackground(sf::RenderWindow& window){
     window.draw(minimapBack);
 }
 
-void UI::minimapDrawPlayerRay(sf::RenderWindow& window, const vector<RayHit>& rayCastResult, const Point2D& playerPosition){
+void UI::minimapDrawPlayerRay(sf::RenderWindow& window, const vector<RayHit>& rayCastResult, const Object2D& player){
+    Point2D playerPosition = player.getPositionCenter();
     minimapPlayerVisibilityArea.setPrimitiveType(sf::TriangleFan);
     minimapPlayerVisibilityArea.resize(rayCastResult.size()+1);
 

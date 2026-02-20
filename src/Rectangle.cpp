@@ -25,7 +25,6 @@ Point2D Rectangle::distanceToObject(Point2D point, float playerRadius){
     float dy = point.getY() - closestDotY;
     float distanceSquared = dx * dx + dy * dy;
 
-    // СЛУЧАЙ 1: Центр игрока СНАРУЖИ прямоугольника (или на самой границе)
     if (distanceSquared > 0) {
         float distance = sqrt(distanceSquared);
         if (distance < playerRadius) {
@@ -33,15 +32,12 @@ Point2D Rectangle::distanceToObject(Point2D point, float playerRadius){
             return Point2D(dx / distance, dy / distance) * overlap;
         }
     } 
-    // СЛУЧАЙ 2: Центр игрока оказался ВНУТРИ прямоугольника
     else {
-        // Ищем расстояния до всех 4-х граней
         float distToLeft   = point.getX() - sideXmin;
         float distToRight  = sideXmax - point.getX();
         float distToTop    = point.getY() - sideYmin;
         float distToBottom = sideYmax - point.getY();
-
-        // Находим минимальное расстояние — это кратчайший путь наружу
+        
         float minDist = min({distToLeft, distToRight, distToTop, distToBottom});
 
         if (minDist == distToLeft)   return Point2D(-(minDist + playerRadius), 0);
@@ -83,7 +79,7 @@ float Rectangle::intersectRay(Point2D startPointRay, Point2D directionVector){
     return timeEnter;
 }
 
-void Rectangle::drawOnMinimap(sf::RenderWindow& window){
+void Rectangle::drawOnMinimap(sf::RenderWindow& window) const{
     sf::RectangleShape rectangle;
     rectangle.setSize(sf::Vector2f(width, length));
     rectangle.setPosition(positionAngle.getX(), positionAngle.getY());

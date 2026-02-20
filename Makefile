@@ -7,7 +7,7 @@ TARGET = CastOut-Engine
 # Компилятор и флаги
 CXX = g++
 # -MMD генерирует .d файлы для отслеживания изменений в хедерах (.hpp)
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./headers -I./engine -I./game -MMD
+CXXFLAGS = -g -Wall -Wextra -std=c++17 -I./headers -I./engine -I./game -MMD
 LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system -lm
 
 # Папки

@@ -50,6 +50,21 @@ Point2D Player::createMoveVector(){
     return moveVector;
 }
 
+void Player::drawOnMinimap(sf::RenderWindow& window) const{
+    sf::CircleShape circle;
+    
+    float visualRadius = radius * MINIMAP_CHARACTER_SIZE_MULTIPLIER;
+    circle.setRadius(visualRadius);
+
+    float drawX = positionCenter.getX() - visualRadius;
+    float drawY = positionCenter.getY() - visualRadius;
+    circle.setPosition(drawX, drawY);
+
+    circle.setFillColor(color);
+
+    window.draw(circle);
+}
+
 void Player::updateRotation(float deltaTime){
     float dRotation = 0.0f;
 

@@ -15,6 +15,8 @@ class Player : public Circle
         void updateObject(const vector<Object2D*>& arrayObjects, float deltaTime) override;
         Point2D createMoveVector();
 
+        void drawOnMinimap(sf::RenderWindow& window) const override;
+
         void setDirectionGaze(float directionGaze);
         void setSpeed(float speed);
 

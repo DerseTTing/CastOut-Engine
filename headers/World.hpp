@@ -1,7 +1,5 @@
 #pragma once
-#include <memory>
 #include <vector>
-#include <random>
 #include "Object2D.hpp"
 #include "settings.hpp"
 #include "Rectangle.hpp"
@@ -10,6 +8,7 @@
 #include "Player.hpp"
 #include "ObjectType.hpp"
 #include "RayHit.hpp"
+#include "Map.hpp"
 using namespace std;
 
 class World
@@ -19,6 +18,7 @@ class World
         ~World();
 
         void runWorld();
+        void restartWorld();
 
         void generationMap();
 
@@ -29,9 +29,6 @@ class World
 
         void updateObjects();
         void castRay(Point2D startPointRay, float directionGaze);
-        
-        float getRandomNumber(float min, float max);
-        int getRandomNumber(int min, int max);
 
         void updateFPS();
 
@@ -42,6 +39,7 @@ class World
         sf::Clock clock;
 
         UI userInterface;
+        Map map;
         Player* player;
         float currentScreenWidth;
         float currentScreenHeight;

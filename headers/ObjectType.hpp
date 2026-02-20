@@ -2,7 +2,10 @@
 
 enum class ObjectType
 {
+    None,
     RectangleWall,
+    Door,
     CircleWall,
     Player
+
 };
