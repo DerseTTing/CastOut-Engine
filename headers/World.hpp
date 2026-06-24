@@ -19,6 +19,8 @@ class World
 
         void runWorld();
         void restartWorld();
+        void pauseWorld();
+        void resumeWorld();
 
         void generationMap();
 
@@ -28,6 +30,9 @@ class World
         void resizedEvent();
 
         void updateObjects();
+
+        void resetMouseDelta();
+
         void castRay(Point2D startPointRay, float directionGaze);
 
         void updateFPS();
@@ -44,7 +49,11 @@ class World
         float currentScreenWidth;
         float currentScreenHeight;
 
+        bool worldIsRunning = true;
+
         float currentFPS;
+
+        float mouseDelta = 0.0f;
 
         vector<Object2D*> arrayObjects;
         vector<RayHit> rayCastResult;

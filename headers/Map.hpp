@@ -5,22 +5,13 @@
 #include "Rectangle.hpp"
 #include "Player.hpp"
 #include "Random.hpp"
+#include "Room.hpp"
+#include "CellMap.hpp"
 
 
 class Map
 {
     private:
-        struct Cell {
-            ObjectType objectType = ObjectType::None;
-            bool indestructible = false;
-            bool createObject = false;
-        };
-
-        struct Room {
-            Point2D positionAngle;
-            int width;
-            int length;
-        };
         
         Cell map[MAP_SIZE_Y][MAP_SIZE_X];
         vector<Room> rooms;
@@ -31,6 +22,7 @@ class Map
         void cutRoom(Point2D startPosition, bool horizontally, int lengthCut);
         void fixingWallNearDoor(const Point2D& positionDoor, bool horizontally);
         vector<int> getDoorPlaces(int lengthWall);
+        void fullRooms();
         void generationPlayer();
 
         vector<Object2D*> createArrayObjects();

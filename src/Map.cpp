@@ -3,6 +3,7 @@
 vector<Object2D*> Map::generationMap(){
     generationWallsAround();
     generationRooms();
+    fullRooms();
     generationPlayer();
 
     return createArrayObjects();
@@ -26,9 +27,9 @@ void Map::generationRooms(){
     vector<Room>* pointerRoomSave = &roomsBuffer2;
     vector<Room>* pointerRoomShare = &roomsBuffer1;
     Room firstRoom;
-    firstRoom.positionAngle = Point2D(1, 1);
-    firstRoom.width = MAP_SIZE_X - 2;
-    firstRoom.length = MAP_SIZE_Y - 2;
+    firstRoom.setPositionAngle(Point2D(1, 1));
+    firstRoom.setWidth(MAP_SIZE_X - 2);
+    firstRoom.setLenght(MAP_SIZE_Y - 2);
 
     roomsBuffer1.push_back(firstRoom);
 
@@ -37,43 +38,43 @@ void Map::generationRooms(){
             if(Random::getRandomNumber(0.0f, 1.0f) < MAP_ROOM_DIVISIONS_SKIP_PERCENT && i + 1 >= MAP_ROOM_DIVISIONS_SKIP_START){
                 pointerRoomSave->push_back((*pointerRoomShare)[j]);
             }
-            else if((*pointerRoomShare)[j].width > MAP_ROOM_MIN_SIZE && (*pointerRoomShare)[j].length > MAP_ROOM_MIN_SIZE){
+            else if((*pointerRoomShare)[j].getWidth() > ROOM_MIN_SIZE && (*pointerRoomShare)[j].getLenght() > ROOM_MIN_SIZE){
                 float proportionDivisions = Random::getRandomNumber(MAP_ROOM_DIVISIONS_PROPORTION_MIN, MAP_ROOM_DIVISIONS_PROPORTION_MAX);
-                if((*pointerRoomShare)[j].width > (*pointerRoomShare)[j].length){
-                    int positionCutX = round((*pointerRoomShare)[j].positionAngle.getX() + (*pointerRoomShare)[j].width * proportionDivisions);
-                    int positionCutY = (*pointerRoomShare)[j].positionAngle.getY();
+                if((*pointerRoomShare)[j].getWidth() > (*pointerRoomShare)[j].getLenght()){
+                    int positionCutX = round((*pointerRoomShare)[j].getPositionAngle().getX() + (*pointerRoomShare)[j].getWidth() * proportionDivisions);
+                    int positionCutY = (*pointerRoomShare)[j].getPositionAngle().getY();
 
                     Room room1;
-                    room1.width = positionCutX - (*pointerRoomShare)[j].positionAngle.getX();
-                    room1.length = (*pointerRoomShare)[j].length;
-                    room1.positionAngle = (*pointerRoomShare)[j].positionAngle;
+                    room1.setWidth(positionCutX - (*pointerRoomShare)[j].getPositionAngle().getX());
+                    room1.setLenght((*pointerRoomShare)[j].getLenght());
+                    room1.setPositionAngle((*pointerRoomShare)[j].getPositionAngle());
                     pointerRoomSave->push_back(room1);
 
                     Room room2;
-                    room2.width = (*pointerRoomShare)[j].width - room1.width - 1;
-                    room2.length = (*pointerRoomShare)[j].length;
-                    room2.positionAngle = Point2D(positionCutX + 1, (*pointerRoomShare)[j].positionAngle.getY());
+                    room2.setWidth((*pointerRoomShare)[j].getWidth() - room1.getWidth() - 1);
+                    room2.setLenght((*pointerRoomShare)[j].getLenght());
+                    room2.setPositionAngle(Point2D(positionCutX + 1, (*pointerRoomShare)[j].getPositionAngle().getY()));
                     pointerRoomSave->push_back(room2);
 
-                    cutRoom(Point2D(positionCutX, positionCutY), false, (*pointerRoomShare)[j].length);
+                    cutRoom(Point2D(positionCutX, positionCutY), false, (*pointerRoomShare)[j].getLenght());
                 }
                 else{
-                    int positionCutX = (*pointerRoomShare)[j].positionAngle.getX();
-                    int positionCutY = (*pointerRoomShare)[j].positionAngle.getY() + (*pointerRoomShare)[j].length * proportionDivisions;
+                    int positionCutX = (*pointerRoomShare)[j].getPositionAngle().getX();
+                    int positionCutY = (*pointerRoomShare)[j].getPositionAngle().getY() + (*pointerRoomShare)[j].getLenght() * proportionDivisions;
 
                     Room room1;
-                    room1.width = (*pointerRoomShare)[j].width;
-                    room1.length = positionCutY - (*pointerRoomShare)[j].positionAngle.getY();
-                    room1.positionAngle = (*pointerRoomShare)[j].positionAngle;
+                    room1.setWidth((*pointerRoomShare)[j].getWidth());
+                    room1.setLenght(positionCutY - (*pointerRoomShare)[j].getPositionAngle().getY());
+                    room1.setPositionAngle((*pointerRoomShare)[j].getPositionAngle());
                     pointerRoomSave->push_back(room1);
 
                     Room room2;
-                    room2.width = (*pointerRoomShare)[j].width;
-                    room2.length = (*pointerRoomShare)[j].length - room1.length - 1;
-                    room2.positionAngle = Point2D((*pointerRoomShare)[j].positionAngle.getX(), positionCutY + 1);
+                    room2.setWidth((*pointerRoomShare)[j].getWidth());
+                    room2.setLenght((*pointerRoomShare)[j].getLenght() - room1.getLenght() - 1);
+                    room2.setPositionAngle(Point2D((*pointerRoomShare)[j].getPositionAngle().getX(), positionCutY + 1));
                     pointerRoomSave->push_back(room2);
 
-                    cutRoom(Point2D(positionCutX, positionCutY), true, (*pointerRoomShare)[j].width);
+                    cutRoom(Point2D(positionCutX, positionCutY), true, (*pointerRoomShare)[j].getWidth());
                 }
             }
         }
@@ -143,35 +144,11 @@ void Map::fixingWallNearDoor(const Point2D& positionDoor, bool horizontally){
         map[posDoorY][posDoorX].createObject = true;
         map[posDoorY][posDoorX].indestructible = true;
         map[posDoorY][posDoorX].objectType = ObjectType::RectangleWall;
-
-        /*if(!map[posDoorY][posDoorX+1].indestructible){
-            map[posDoorY][posDoorX+1].createObject = false;
-            map[posDoorY][posDoorX+1].indestructible = false;
-            map[posDoorY][posDoorX+1].objectType = ObjectType::Door;
-        }
-
-        if(!map[posDoorY][posDoorX-1].indestructible){
-            map[posDoorY][posDoorX-1].createObject = false;
-            map[posDoorY][posDoorX-1].indestructible = false;
-            map[posDoorY][posDoorX-1].objectType = ObjectType::Door;
-        }*/
     }
     else{
         map[posDoorY][posDoorX].createObject = true;
         map[posDoorY][posDoorX].indestructible = true;
         map[posDoorY][posDoorX].objectType = ObjectType::RectangleWall;
-
-        /*if(!map[posDoorY+1][posDoorX].indestructible){
-            map[posDoorY+1][posDoorX].createObject = false;
-            map[posDoorY+1][posDoorX].indestructible = false;
-            map[posDoorY+1][posDoorX].objectType = ObjectType::Door;
-        }
-
-        if(!map[posDoorY-1][posDoorX].indestructible){
-            map[posDoorY-1][posDoorX].createObject = false;
-            map[posDoorY-1][posDoorX].indestructible = false;
-            map[posDoorY-1][posDoorX].objectType = ObjectType::Door;
-        }*/
     }
 }
 
@@ -200,8 +177,27 @@ vector<int> Map::getDoorPlaces(int lengthWall){
     return doorPlaces;
 }
 
+void Map::fullRooms(){
+    for(int i = 0; i < rooms.size(); i++){
+        rooms[i].fullRoom(map);
+    }
+}
 
 void Map::generationPlayer(){
+    int k = 10000;
+
+    while(k > 0){
+        int y = Random::getRandomNumber(1, MAP_SIZE_Y);
+        int x = Random::getRandomNumber(1, MAP_SIZE_X);
+
+        if(map[y][x].objectType == ObjectType::None || map[y][x].objectType == ObjectType::Circle){
+            map[y][x].objectType = ObjectType::Player;
+            map[y][x].createObject = true;
+            return;
+        }
+    }
+
+
     map[2][2].objectType = ObjectType::Player;
     map[2][2].createObject = true;
 }
@@ -220,7 +216,7 @@ vector<Object2D*> Map::createArrayObjects(){
                     x++;
                 }
 
-                if(sizeX > 1 || objectType == ObjectType::Player) {
+                if(sizeX > 1 && objectType == ObjectType::RectangleWall) {
                 
                     for(int i = startX; i < startX + sizeX; i++)
                         map[y][i].createObject = false;
@@ -230,10 +226,6 @@ vector<Object2D*> Map::createArrayObjects(){
                     if(objectType == ObjectType::RectangleWall){
                         Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, sizeX * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
                         arrayObjects.push_back(rectangle);
-                    }
-                    if(objectType == ObjectType::Player){
-                        Circle* player = new Player(position * MAP_CELL_SIZE, PLAYER_RADIUS, WALL_HEIGHT, PLAYER_COLOR, ObjectType::Player);
-                        arrayObjects.push_back(player);
                     }
                 }
             }
@@ -248,10 +240,19 @@ vector<Object2D*> Map::createArrayObjects(){
                 ObjectType objectType = map[y][x].objectType;
                 int startY = y;
                 int sizeY = 0;
-                while(y < MAP_SIZE_Y && map[y][x].createObject == true && map[y][x].objectType == objectType){
+                if(objectType == ObjectType::RectangleWall){
+                    while(y < MAP_SIZE_Y && map[y][x].createObject == true && map[y][x].objectType == objectType){
+                        sizeY++;
+                        y++;
+                    }
+                }
+                else{
                     sizeY++;
                     y++;
                 }
+
+                for(int i = startY; i < startY + sizeY; i++)
+                    map[i][x].createObject = false;
 
                 Point2D position = Point2D(x + 0.5f, startY + sizeY/2.0f);
 
@@ -262,6 +263,21 @@ vector<Object2D*> Map::createArrayObjects(){
                 if(objectType == ObjectType::Player){
                     Circle* player = new Player(position * MAP_CELL_SIZE, PLAYER_RADIUS, WALL_HEIGHT, PLAYER_COLOR, ObjectType::Player);
                     arrayObjects.push_back(player);
+                }
+                if(objectType == ObjectType::CircleGenerator || objectType == ObjectType::CircleWallGenerator){
+                    int circleSize = 1;
+                    int bias = 1;
+                    
+
+                    while(map[startY][x + bias].objectType == ObjectType::Circle || map[startY][x + bias].objectType == ObjectType::CircleWall){
+                        circleSize++;
+                        bias++;
+                    }
+
+                    float radius = circleSize / 2.0f;
+                    position = Point2D(x + radius, startY + radius);
+                    Circle* circle = new Circle(position * MAP_CELL_SIZE, radius * MAP_CELL_SIZE, WALL_HEIGHT, WALL_CIRCLE_COLOR, ObjectType::CircleWall);
+                    arrayObjects.push_back(circle);
                 }
             }
             else

@@ -79,7 +79,7 @@ float Rectangle::intersectRay(Point2D startPointRay, Point2D directionVector){
     return timeEnter;
 }
 
-void Rectangle::drawOnMinimap(sf::RenderWindow& window) const{
+void Rectangle::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{
     sf::RectangleShape rectangle;
     rectangle.setSize(sf::Vector2f(width, length));
     rectangle.setPosition(positionAngle.getX(), positionAngle.getY());

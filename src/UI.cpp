@@ -51,10 +51,10 @@ void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObj
 
     minimapDrawPlayerRay(window, rayCastResult, player);
 
-    player.drawOnMinimap(window);
+    player.drawOnMinimap(PLAYER_COLOR, window);
     for (int i = 0; i < arrayObjects.size(); i++){
         if(arrayObjects[i]->getObjectType() != ObjectType::Player)
-            arrayObjects[i]->drawOnMinimap(window);
+            arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
     }
 
     window.setView(oldView);
@@ -130,6 +130,21 @@ void UI::drawRayCastResult(sf::RenderWindow& window, const vector<RayHit>& rayCa
             window.draw(strip);
         }
     }
+}
+
+void UI::drawStaminaBar(sf::RenderWindow& window, float currentStamina, float currentScreenWidth, float currentScreenHeight, bool sprintIsAvailable){
+    staminaBarBack.setSize(sf::Vector2f(currentScreenWidth * (STAMINA_BAR_SIZE_SHARE_X + STAMINA_BAR_BACKGROUND_SHARE_INDENT), currentScreenHeight * (STAMINA_BAR_SIZE_SHARE_Y + STAMINA_BAR_BACKGROUND_SHARE_INDENT)));
+    staminaBarBack.setPosition(currentScreenWidth * STAMINA_BAR_POSITION_SHARE_X, currentScreenHeight * STAMINA_BAR_POSITION_SHARE_Y);
+    staminaBarBack.setFillColor(STAMINA_BAR_BACKGROUND_COLOR);
+    window.draw(staminaBarBack);
+
+    staminaBar.setSize(sf::Vector2f(currentScreenWidth * STAMINA_BAR_SIZE_SHARE_X, currentScreenHeight * STAMINA_BAR_SIZE_SHARE_Y * (currentStamina / PLAYER_MAX_STAMINA)));
+    staminaBar.setPosition(currentScreenWidth * (STAMINA_BAR_POSITION_SHARE_X + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2), currentScreenHeight * (STAMINA_BAR_POSITION_SHARE_Y + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2));
+    if(currentStamina / PLAYER_MAX_STAMINA > PLAYER_PART_STAMINA_TO_SHIFT || sprintIsAvailable)
+        staminaBar.setFillColor(STAMINA_BAR_COLOR);
+    else
+        staminaBar.setFillColor(STAMINA_BAR_COLOR_DEFICIENCY);
+    window.draw(staminaBar);
 }
 
 void UI::drawFPS(sf::RenderWindow& window, float currentFPS, float currentScreenWidth){

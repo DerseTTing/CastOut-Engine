@@ -24,7 +24,7 @@ class Object2D
         virtual Point2D distanceToObject(Point2D point, float playerRadius) = 0;
         virtual float intersectRay(Point2D startPointRay, Point2D directionVector) = 0;
         virtual void updateObject(const vector<Object2D*>& arrayObjects, float deltaTime) {};
-        virtual void drawOnMinimap(sf::RenderWindow& window) const = 0;
+        virtual void drawOnMinimap(sf::Color color, sf::RenderWindow& window) const = 0;
 
         virtual void setPositionCenter(const Point2D& positionCenter);
         void setColor(sf::Color color);

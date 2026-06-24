@@ -4,11 +4,13 @@ Player::Player(const Point2D& positionCenter, float radius, float objectHeight, 
     :Circle(positionCenter, radius, objectHeight, color, objectType){
     speed = PLAYER_SPEED;
     directionGaze = PLAYER_VIEWING_ANGLE;
+    stamina = PLAYER_MAX_STAMINA;
 }
 
-void Player::updateObject(const vector<Object2D*>& arrayObjects, float deltaTime){
+void Player::updatePlayer(const vector<Object2D*>& arrayObjects, float deltaAngleRotation, float deltaTime){
+    updateStamina(deltaTime);
     updateMovement(arrayObjects, deltaTime);
-    updateRotation(deltaTime);
+    updateRotation(deltaAngleRotation, deltaTime);
 }
 
 void Player::updateMovement(const vector<Object2D*>& arrayObjects, float deltaTime){
@@ -23,7 +25,6 @@ void Player::updateMovement(const vector<Object2D*>& arrayObjects, float deltaTi
                 if (pushOut.getX() != 0 || pushOut.getY() != 0) {
                     targetPosition = targetPosition + pushOut;
                 }
-                
             }
         }
     }
@@ -45,12 +46,34 @@ Point2D Player::createMoveVector(){
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         moveVector = moveVector + directionVectorRight;
 
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && sprintIsAvailable == true)
+        speed = PLAYER_SPEED * PLAYER_SHIFT_SPEED_MULTIPLIER;
+    else
+        speed = PLAYER_SPEED;
+    
+    
+
     moveVector.normalizedVector();
 
     return moveVector;
 }
 
-void Player::drawOnMinimap(sf::RenderWindow& window) const{
+void Player::updateStamina(float deltaTime){
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && sprintIsAvailable == true)
+        stamina -= PLAYER_DEGENERATION_STAMINA * deltaTime;
+    else if(stamina < PLAYER_MAX_STAMINA)
+        stamina += PLAYER_REGENERATION_STAMINA * deltaTime;
+    
+    if(stamina <= 0)
+        sprintIsAvailable = false;
+
+    if(stamina > PLAYER_PART_STAMINA_TO_SHIFT*PLAYER_MAX_STAMINA)
+        sprintIsAvailable = true;
+}
+
+
+
+void Player::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{
     sf::CircleShape circle;
     
     float visualRadius = radius * MINIMAP_CHARACTER_SIZE_MULTIPLIER;
@@ -65,18 +88,8 @@ void Player::drawOnMinimap(sf::RenderWindow& window) const{
     window.draw(circle);
 }
 
-void Player::updateRotation(float deltaTime){
-    float dRotation = 0.0f;
-
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-        dRotation -= 1.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-        dRotation += 1.0f;
-
-    if(dRotation != 0){
-        float rotation = getDirectionGaze() + (dRotation * PLAYER_SCREEN_ROTATION_SENSITIVITY * deltaTime);
-        setDirectionGaze(rotation);
-    }
+void Player::updateRotation(float deltaAngleRotation, float deltaTime){
+     setDirectionGaze(getDirectionGaze() + deltaAngleRotation);
 }
 
 void Player::setDirectionGaze(float directionGaze){
@@ -87,10 +100,22 @@ void Player::setSpeed(float speed){
     this->speed = speed;
 }
 
+void Player::setStamina(float stamina){
+    this->stamina = stamina;
+}
+
 float Player::getDirectionGaze(){
     return directionGaze;
 }
 
 float Player::getSpeed(){
     return speed;
+}
+
+float Player::getStamina(){
+    return stamina;
+}
+
+bool Player::getSprintIsAvailable(){
+    return sprintIsAvailable;
 }

@@ -4,4 +4,5 @@ obj/main.o: src/main.cpp src/../headers/World.hpp \
  src/../headers/settings.hpp src/../headers/Rectangle.hpp \
  src/../headers/UI.hpp src/../headers/Circle.hpp \
  src/../headers/Player.hpp src/../headers/Map.hpp \
- src/../headers/Random.hpp
+ src/../headers/Random.hpp src/../headers/Room.hpp \
+ src/../headers/CellMap.hpp

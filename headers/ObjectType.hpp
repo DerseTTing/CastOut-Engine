@@ -6,6 +6,8 @@ enum class ObjectType
     RectangleWall,
     Door,
     CircleWall,
+    CircleWallGenerator,
+    CircleGenerator,
+    Circle,
     Player
-
 };

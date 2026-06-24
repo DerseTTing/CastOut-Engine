@@ -54,7 +54,7 @@ float Circle::intersectRay(Point2D startPointRay, Point2D directionVector){
     return distToCircle;
 }
 
-void Circle::drawOnMinimap(sf::RenderWindow& window) const{
+void Circle::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{
     sf::CircleShape circle;
     
     circle.setRadius(radius);

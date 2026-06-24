@@ -6,6 +6,10 @@ World::World()
 
     currentScreenWidth = SCREEN_SIZE_X;
     currentScreenHeight = SCREEN_SIZE_Y;
+
+    window.setMouseCursorVisible(false);
+    window.setMouseCursorGrabbed(true);
+
     generationMap();
 }
 
@@ -20,13 +24,17 @@ void World::runWorld(){
         while (window.pollEvent(event)){
             processingEvent();
         }
-        deltaTime = clock.restart().asSeconds();
 
-        castRay(player->getPositionCenter(), player->getDirectionGaze());
-        updateObjects();
-        updateFPS();
+        if(worldIsRunning){
+            deltaTime = clock.restart().asSeconds();
 
-        drawFrame();
+            castRay(player->getPositionCenter(), player->getDirectionGaze());
+            updateObjects();
+
+            updateFPS();
+
+            drawFrame();
+        }
     }
 }
 
@@ -40,6 +48,26 @@ void World::restartWorld(){
     generationMap();
 }
 
+void World::pauseWorld(){
+    if(!worldIsRunning)
+        return;
+
+    window.setMouseCursorGrabbed(false);
+    window.setMouseCursorVisible(true);
+    worldIsRunning = false;
+}
+
+void World::resumeWorld(){
+    if(worldIsRunning)
+        return;
+
+    clock.restart();
+    window.setMouseCursorGrabbed(true);
+    window.setMouseCursorVisible(false);
+    worldIsRunning = true;
+}
+
+
 void World::generationMap(){
     arrayObjects = map.generationMap();
 
@@ -52,10 +80,21 @@ void World::generationMap(){
 void World::processingEvent(){
     if (event.type == sf::Event::Closed)
         window.close();
-    if (event.type == sf::Event::Resized)
+    else if (event.type == sf::Event::Resized)
         resizedEvent();
-    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R)
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R)
         restartWorld();
+    else if(event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Numpad7) || event.type == sf::Event::LostFocus)
+        pauseWorld();
+    else if(event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::GainedFocus)
+        resumeWorld();
+}
+
+void World::resizedEvent(){
+    currentScreenWidth = event.size.width;
+    currentScreenHeight = event.size.height;
+    view = sf::View(sf::FloatRect(0, 0, currentScreenWidth, currentScreenHeight));
+    window.setView(view);
 }
 
 void World::drawFrame(){
@@ -64,6 +103,7 @@ void World::drawFrame(){
     userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
     userInterface.drawRayCastResult(window, rayCastResult, currentScreenWidth, currentScreenHeight);
     userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player);
+    userInterface.drawStaminaBar(window, player->getStamina(), currentScreenWidth, currentScreenHeight, player->getSprintIsAvailable());
     userInterface.drawFPS(window, currentFPS, currentScreenWidth);
 
     window.display();
@@ -72,8 +112,31 @@ void World::drawFrame(){
 
 void World::updateObjects(){
     for(int i = 0; i < arrayObjects.size(); i++){
-        arrayObjects[i]->updateObject(arrayObjects, deltaTime);
+        if(arrayObjects[i]->getObjectType() != ObjectType::Player)
+            arrayObjects[i]->updateObject(arrayObjects, deltaTime);
     }
+
+    resetMouseDelta();
+    player->updatePlayer(arrayObjects, mouseDelta, deltaTime);
+}
+
+void World::resetMouseDelta(){
+     if(!window.hasFocus()){
+        mouseDelta = 0.0f;
+        return;
+    }
+
+    sf::Vector2i windowCenter(currentScreenWidth / 2, currentScreenHeight / 2);
+    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+
+    int deltaX = mousePos.x - windowCenter.x;
+
+    sf::Mouse::setPosition(windowCenter, window);
+
+    if(std::abs(deltaX) < currentScreenWidth / 2)
+        mouseDelta = deltaX * PLAYER_SCREEN_ROTATION_SENSITIVITY;
+    else
+        mouseDelta = 0.0f;   
 }
 
 void World::castRay(Point2D startPointRay, float directionGaze){
@@ -127,13 +190,6 @@ RayHit World::createRayHit(float minDistance, float currentAngle, Object2D* clos
     }
 
     return hit;
-}
-
-void World::resizedEvent(){
-    currentScreenWidth = event.size.width;
-    currentScreenHeight = event.size.height;
-    view = sf::View(sf::FloatRect(0, 0, currentScreenWidth, currentScreenHeight));
-    window.setView(view);
 }
 
 void World::updateFPS() {
