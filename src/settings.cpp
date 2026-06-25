@@ -28,8 +28,8 @@ const float WALL_HEIGHT = 150.0f;
 const sf::Color PLAYER_COLOR = sf::Color(0, 153, 25);
 const int PLAYER_RADIUS = 25;
 const int PLAYER_SPEED = 250;
-const float PLAYER_SHIFT_SPEED_MULTIPLIER = 2.5f;
-const float PLAYER_MAX_STAMINA = 3;
+const float PLAYER_SHIFT_SPEED_MULTIPLIER = 2.1f;
+const float PLAYER_MAX_STAMINA = 2.5f;
 const float PLAYER_REGENERATION_STAMINA = 0.3f;
 const float PLAYER_DEGENERATION_STAMINA = 0.9f;
 const float PLAYER_PART_STAMINA_TO_SHIFT = 0.45f;
@@ -74,5 +74,9 @@ const sf::Color STAMINA_BAR_COLOR_DEFICIENCY = sf::Color(79, 58, 58);
 const float FOV_TANGENT = std::tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 
 // Организовать нормально шансы генерации комнат
-// Сверху вниз шкала стамины
+//
+//
+//
+//
+//
 //

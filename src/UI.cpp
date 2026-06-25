@@ -138,8 +138,9 @@ void UI::drawStaminaBar(sf::RenderWindow& window, float currentStamina, float cu
     staminaBarBack.setFillColor(STAMINA_BAR_BACKGROUND_COLOR);
     window.draw(staminaBarBack);
 
+    float biasPositionBar = STAMINA_BAR_SIZE_SHARE_Y * currentScreenHeight - currentScreenHeight * STAMINA_BAR_SIZE_SHARE_Y * (currentStamina / PLAYER_MAX_STAMINA);
     staminaBar.setSize(sf::Vector2f(currentScreenWidth * STAMINA_BAR_SIZE_SHARE_X, currentScreenHeight * STAMINA_BAR_SIZE_SHARE_Y * (currentStamina / PLAYER_MAX_STAMINA)));
-    staminaBar.setPosition(currentScreenWidth * (STAMINA_BAR_POSITION_SHARE_X + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2), currentScreenHeight * (STAMINA_BAR_POSITION_SHARE_Y + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2));
+    staminaBar.setPosition(currentScreenWidth * (STAMINA_BAR_POSITION_SHARE_X + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2), currentScreenHeight * (STAMINA_BAR_POSITION_SHARE_Y + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2) + biasPositionBar);
     if(currentStamina / PLAYER_MAX_STAMINA > PLAYER_PART_STAMINA_TO_SHIFT || sprintIsAvailable)
         staminaBar.setFillColor(STAMINA_BAR_COLOR);
     else
