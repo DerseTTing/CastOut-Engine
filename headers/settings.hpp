@@ -14,8 +14,8 @@ extern const int SCREEN_SIZE_X;
 extern const int SCREEN_SIZE_Y;
 
 // Настройки генерации карты
-inline constexpr int MAP_SIZE_X = 50;
-inline constexpr int MAP_SIZE_Y = 50;
+inline constexpr int MAP_SIZE_X = 70;
+inline constexpr int MAP_SIZE_Y = 70;
 extern const int MAP_CELL_SIZE;
 extern const int MAP_NUMBER_ROOM_DIVISIONS;
 extern const float MAP_ROOM_DIVISIONS_SKIP_PERCENT;
