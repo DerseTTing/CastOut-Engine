@@ -11,7 +11,7 @@ const float MAP_ROOM_DIVISIONS_SKIP_PERCENT = 0.45f;
 const int MAP_ROOM_DIVISIONS_SKIP_START = 4;
 const float MAP_ROOM_DIVISIONS_PROPORTION_MAX = 0.65f;
 const float MAP_ROOM_DIVISIONS_PROPORTION_MIN = 0.35f;
-const float MAP_DOOR_PERCENT = 0.05f;
+const float MAP_DOOR_PERCENT = 0.07f;
 
 // Генерация комнат
 const int ROOM_MIN_SIZE = 8;
@@ -40,7 +40,7 @@ const float PLAYER_VIEWING_ANGLE = 90.0f;
 const int ENEMY_RADIUS = 25;
 const int ENEMY_HEIGHT = 150;
 const int ENEMY_SPEED_SEARCH = 440;
-const int ENEMY_SPEED_CHASE = 305;
+const int ENEMY_SPEED_CHASE = 290;
 const sf::Color ENEMY_COLOR = sf::Color(171, 37, 22);
 const float ENEMY_FOG_DENSITY = 0.001f;
 
@@ -80,9 +80,12 @@ const sf::Color STAMINA_BAR_COLOR_DEFICIENCY = sf::Color(79, 58, 58);
 const float FOV_TANGENT = tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 
 // Организовать нормально шансы генерации комнат
-//
-//
-//
-//
-//
+// 
+// Фикс багов (сквозь стены)
+// Отключение миникарты
+// Красный фон при приближении врага
+// Ключи
+// Ранение
+// Убийство 
+// Выход
 //
