@@ -44,16 +44,21 @@ void UI::drawBackground(sf::RenderWindow& window, float currentScreenWidth, floa
     window.draw(floor);
 }
 
-void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player) {
+void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player, bool showEnemyOnMinimap) {
     minimapChangeView(window);
 
     minimapDrawBackground(window);
 
     minimapDrawPlayerRay(window, rayCastResult, player);
-
-    player.drawOnMinimap(PLAYER_COLOR, window);
+    
     for (int i = 0; i < arrayObjects.size(); i++){
-        if(arrayObjects[i]->getObjectType() != ObjectType::Player)
+        if(arrayObjects[i]->getObjectType() == ObjectType::Enemy){
+            if(showEnemyOnMinimap)
+                arrayObjects[i]->drawOnMinimap(ENEMY_COLOR, window);
+        }
+        else if(arrayObjects[i]->getObjectType() == ObjectType::Player)
+            arrayObjects[i]->drawOnMinimap(PLAYER_COLOR, window);
+        else
             arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
     }
 
@@ -109,7 +114,7 @@ void UI::minimapDrawOutline(sf::RenderWindow& window){
 void UI::drawRayCastResult(sf::RenderWindow& window, const vector<RayHit>& rayCastResult, float currentScreenWidth, float currentScreenHeight){
     float distanceToProjection = (currentScreenHeight / 2.0f) / FOV_TANGENT;
     for(int i = 0; i < rayCastResult.size(); i++){
-        if(rayCastResult[i].hit){
+        if(rayCastResult[i].hit && rayCastResult[i].closestObject->getObjectType() != ObjectType::Enemy){
             float objectHeight = rayCastResult[i].closestObject->getObjectHeight();
             float distance = rayCastResult[i].distance;
             if (distance < 0.1f) distance = 0.1f;
@@ -118,7 +123,7 @@ void UI::drawRayCastResult(sf::RenderWindow& window, const vector<RayHit>& rayCa
             
             //Вынести цвет отдельно
             sf::Color color = rayCastResult[i].closestObject->getColor();
-            float fogFactor = 1.0f - expf(-distance * DENSITY);;
+            float fogFactor = 1.0f - expf(-distance * FOG_DENSITY);
 
             color.r = color.r * (1 - fogFactor) + BACKGROUND_COLOR_FAR.r * fogFactor;
             color.b = color.b * (1 - fogFactor) + BACKGROUND_COLOR_FAR.b * fogFactor;
@@ -146,6 +151,52 @@ void UI::drawStaminaBar(sf::RenderWindow& window, float currentStamina, float cu
     else
         staminaBar.setFillColor(STAMINA_BAR_COLOR_DEFICIENCY);
     window.draw(staminaBar);
+}
+
+void UI::drawEnemy(sf::RenderWindow& window, const Enemy& enemy, const Player& player, const vector<RayHit>& rayCastResult, float currentScreenWidth, float currentScreenHeight){
+    Point2D positionEnemy = enemy.getPositionCenter();
+    Point2D positionPlayer = player.getPositionCenter();
+    Point2D vectorPlayerToEnemy = Point2D(positionEnemy.getX() - positionPlayer.getX(), positionEnemy.getY() - positionPlayer.getY());
+    
+    float relativeAngle = atan2(vectorPlayerToEnemy.getY(), vectorPlayerToEnemy.getX()) * RAD_TO_DEG - player.getDirectionGaze();
+    while(relativeAngle < -180)
+        relativeAngle += 360;
+    while(relativeAngle > 180)
+        relativeAngle -= 360;
+
+    if(abs(relativeAngle) > PLAYER_VIEWING_ANGLE/2 + 45)
+        return;
+
+    float distanceToEnemy = vectorPlayerToEnemy.getLenghtVector();
+    float distanceToProjection = (currentScreenHeight / 2) / FOV_TANGENT;
+    float screenX = tan(relativeAngle * DEG_TO_RAD) / FOV_TANGENT;
+    int centerEnemyOnScreenX = round((screenX + 1.0f) / 2.0f * currentScreenWidth);
+
+    float halfAngle = atan2f(ENEMY_RADIUS, distanceToEnemy);
+    float spriteHeight = ENEMY_HEIGHT * distanceToProjection / distanceToEnemy;
+    float screenXRight = (ENEMY_RADIUS / distanceToEnemy) / FOV_TANGENT;
+    int spriteRadius = round(screenXRight * currentScreenWidth / 2.0f);
+
+    float stepStripX = currentScreenWidth / rayCastResult.size();
+
+    float fogFactor = 1.0f - expf(-distanceToEnemy * ENEMY_FOG_DENSITY);
+    sf::Color color = ENEMY_COLOR;
+    color.r = color.r * (1 - fogFactor) + BACKGROUND_COLOR_FAR.r * fogFactor;
+    color.g = color.g * (1 - fogFactor) + BACKGROUND_COLOR_FAR.g * fogFactor;
+    color.b = color.b * (1 - fogFactor) + BACKGROUND_COLOR_FAR.b * fogFactor;
+
+    for(int i = 0; i < rayCastResult.size(); i++){
+        float rayAngle = rayCastResult[i].angle;
+        float correctedDistanceToEnemy = distanceToEnemy * cos((rayAngle - player.getDirectionGaze()) * DEG_TO_RAD);
+        if(i > centerEnemyOnScreenX - spriteRadius && i < centerEnemyOnScreenX + spriteRadius && rayCastResult[i].distanceWithoutCorrection > correctedDistanceToEnemy){
+            enemyStrip.setSize(sf::Vector2f(stepStripX, spriteHeight));
+            enemyStrip.setPosition(i * stepStripX, (currentScreenHeight - spriteHeight)/2);
+            enemyStrip.setFillColor(color);
+            window.draw(enemyStrip);
+        }
+    }
+
+
 }
 
 void UI::drawFPS(sf::RenderWindow& window, float currentFPS, float currentScreenWidth){

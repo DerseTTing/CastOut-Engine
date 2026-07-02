@@ -14,8 +14,8 @@ extern const int SCREEN_SIZE_X;
 extern const int SCREEN_SIZE_Y;
 
 // Настройки генерации карты
-inline constexpr int MAP_SIZE_X = 80;
-inline constexpr int MAP_SIZE_Y = 80;
+inline constexpr int MAP_SIZE_X = 50;
+inline constexpr int MAP_SIZE_Y = 50;
 extern const int MAP_CELL_SIZE;
 extern const int MAP_NUMBER_ROOM_DIVISIONS;
 extern const float MAP_ROOM_DIVISIONS_SKIP_PERCENT;
@@ -49,6 +49,11 @@ extern const float PLAYER_VIEWING_ANGLE;
 
 // Настройки врага
 extern const int ENEMY_RADIUS;
+extern const int ENEMY_HEIGHT;
+extern const int ENEMY_SPEED_SEARCH;
+extern const int ENEMY_SPEED_CHASE;
+extern const sf::Color ENEMY_COLOR;
+extern const float ENEMY_FOG_DENSITY;
 
 // Настройки миникарты
 extern const float MINIMAP_SHARE_SIZE;
@@ -67,7 +72,7 @@ extern const float MINIMAP_CHARACTER_SIZE_MULTIPLIER;
 extern const int RAY_FREQUENCY_IN_PIXEL;
 
 // Настройка фона
-extern const float DENSITY;
+extern const float FOG_DENSITY;
 extern const sf::Color BACKGROUND_COLOR_NEAR_FLOOR;
 extern const sf::Color BACKGROUND_COLOR_NEAR_CEILING;
 extern const sf::Color BACKGROUND_COLOR_FAR;

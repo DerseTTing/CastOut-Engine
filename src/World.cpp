@@ -43,7 +43,7 @@ void World::restartWorld(){
         delete arrayObjects[i];
     }
     arrayObjects.clear();
-    map.clearMap();
+    mapObj.clearMap();
     
     generationMap();
 }
@@ -69,12 +69,18 @@ void World::resumeWorld(){
 
 
 void World::generationMap(){
-    arrayObjects = map.generationMap();
+    arrayObjects = mapObj.generationMap();
 
     for(int i = 0; i < arrayObjects.size(); i++){
         if(arrayObjects[i]->getObjectType() == ObjectType::Player)
             player = static_cast<Player*>(arrayObjects[i]);
+        if(arrayObjects[i]->getObjectType() == ObjectType::Enemy){
+            enemy = static_cast<Enemy*>(arrayObjects[i]);
+        }
     }
+
+    enemy->setMap(mapObj.getMap());
+    enemy->setPlayer(player);
 }
 
 void World::processingEvent(){
@@ -88,6 +94,12 @@ void World::processingEvent(){
         pauseWorld();
     else if(event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::GainedFocus)
         resumeWorld();
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && showEnemyOnMinimap)
+        showEnemyOnMinimap = false;
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && !showEnemyOnMinimap)
+        showEnemyOnMinimap = true;
+    
+
 }
 
 void World::resizedEvent(){
@@ -102,7 +114,8 @@ void World::drawFrame(){
 
     userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
     userInterface.drawRayCastResult(window, rayCastResult, currentScreenWidth, currentScreenHeight);
-    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player);
+    userInterface.drawEnemy(window, *enemy, *player, rayCastResult, currentScreenWidth, currentScreenHeight);
+    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player, showEnemyOnMinimap);
     userInterface.drawStaminaBar(window, player->getStamina(), currentScreenWidth, currentScreenHeight, player->getSprintIsAvailable());
     userInterface.drawFPS(window, currentFPS, currentScreenWidth);
 
@@ -111,13 +124,12 @@ void World::drawFrame(){
 
 
 void World::updateObjects(){
-    for(int i = 0; i < arrayObjects.size(); i++){
-        if(arrayObjects[i]->getObjectType() != ObjectType::Player)
-            arrayObjects[i]->updateObject(arrayObjects, deltaTime);
-    }
-
     resetMouseDelta();
-    player->updatePlayer(arrayObjects, mouseDelta, deltaTime);
+    player->setMouseDelta(mouseDelta);
+
+    for(int i = 0; i < arrayObjects.size(); i++){
+        arrayObjects[i]->updateObject(arrayObjects, deltaTime);
+    }
 }
 
 void World::resetMouseDelta(){
@@ -158,7 +170,7 @@ RayHit World::findClosestIntersection(Point2D startPoint, float currentAngle, Po
     Object2D* closestObject = nullptr;
 
     for(int i = 0; i < arrayObjects.size();i++){
-            if(arrayObjects[i]->getObjectType() != ObjectType::Player){
+            if(arrayObjects[i]->getObjectType() != ObjectType::Player && arrayObjects[i]->getObjectType() != ObjectType::Enemy){
                 float dist = arrayObjects[i]->intersectRay(startPoint, directionVector);
                 if(minDistance > dist && dist != -1.0f){
                     minDistance = dist;

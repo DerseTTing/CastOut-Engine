@@ -2,7 +2,7 @@ obj/World.o: src/World.cpp src/../headers/World.hpp \
  src/../headers/Object2D.hpp src/../headers/Point2D.hpp \
  src/../headers/ObjectType.hpp src/../headers/RayHit.hpp \
  src/../headers/settings.hpp src/../headers/Rectangle.hpp \
- src/../headers/UI.hpp src/../headers/Circle.hpp \
- src/../headers/Player.hpp src/../headers/Map.hpp \
- src/../headers/Random.hpp src/../headers/Room.hpp \
- src/../headers/CellMap.hpp
+ src/../headers/UI.hpp src/../headers/Player.hpp \
+ src/../headers/Circle.hpp src/../headers/Enemy.hpp \
+ src/../headers/CellMap.hpp src/../headers/Random.hpp \
+ src/../headers/Map.hpp src/../headers/Room.hpp

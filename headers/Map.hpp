@@ -7,6 +7,7 @@
 #include "Random.hpp"
 #include "Room.hpp"
 #include "CellMap.hpp"
+#include "Enemy.hpp"
 
 
 class Map
@@ -24,11 +25,17 @@ class Map
         vector<int> getDoorPlaces(int lengthWall);
         void fullRooms();
         void generationPlayer();
+        void generationEnemy();
 
         vector<Object2D*> createArrayObjects();
 
     public:
         vector<Object2D*> generationMap();
+        
+        const Cell (*getMap())[MAP_SIZE_X];
+
         void clearMap();
 
 };
+
+// Разбить на гетеры и генерацию?

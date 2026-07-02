@@ -33,25 +33,26 @@ Point2D Circle::distanceToObject(Point2D point, float playerRadius){
 }
 
 float Circle::intersectRay(Point2D startPointRay, Point2D directionVector){
-    float posX_directionVector = directionVector.getX();
-    float posY_directionVector = directionVector.getY();
-
     float posX_toCircleVector = positionCenter.getX() - startPointRay.getX();
     float posY_toCircleVector = positionCenter.getY() - startPointRay.getY();
     Point2D toCircleVector = {posX_toCircleVector, posY_toCircleVector};
 
+    float distToCenterSquared = toCircleVector.getX() * toCircleVector.getX() + toCircleVector.getY() * toCircleVector.getY();
+    bool startInsideCircle = distToCenterSquared < radius * radius;
+
     float tca = directionVector.getX() * toCircleVector.getX() + directionVector.getY() * toCircleVector.getY();
-    
-    if(tca < 0) return -1.0f;
+    if(tca < 0 && !startInsideCircle) return -1.0f; // круг целиком позади луча, и мы не внутри него
 
-    float perpendicularSquared = (toCircleVector.getX() * toCircleVector.getX() + toCircleVector.getY() * toCircleVector.getY()) - (tca*tca); 
+    float perpendicularSquared = distToCenterSquared - tca * tca;
+    if(perpendicularSquared > radius * radius) return -1.0f;
 
-    if (perpendicularSquared > radius * radius) return -1.0f;
+    float thc = sqrt(radius * radius - perpendicularSquared);
+    float t1 = tca - thc; // ближняя точка (вход)
+    float t2 = tca + thc; // дальняя точка (выход)
 
-    float distanceReturn = sqrt(radius*radius - perpendicularSquared);
-    float distToCircle = tca - distanceReturn;
-    if(distToCircle < 0) return -1.0f;
-    return distToCircle;
+    if(t1 >= 0) return t1;
+    if(t2 >= 0) return t2; // мы стартуем внутри круга — возвращаем точку выхода
+    return -1.0f;
 }
 
 void Circle::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{

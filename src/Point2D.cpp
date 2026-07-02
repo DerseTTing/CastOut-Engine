@@ -70,3 +70,11 @@ Point2D Point2D::operator*(float constNumber) const{
     newPoint.setY(getY() * constNumber);
     return newPoint;
 }
+
+bool Point2D::operator==(const Point2D& point2) const{
+    return x == point2.getX() && y == point2.getY();
+}
+
+bool Point2D::operator!=(const Point2D& point2) const{
+    return x != point2.getX() || y != point2.getY();
+}

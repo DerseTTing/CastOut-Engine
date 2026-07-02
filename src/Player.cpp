@@ -7,10 +7,10 @@ Player::Player(const Point2D& positionCenter, float radius, float objectHeight, 
     stamina = PLAYER_MAX_STAMINA;
 }
 
-void Player::updatePlayer(const vector<Object2D*>& arrayObjects, float deltaAngleRotation, float deltaTime){
+void Player::updateObject(const vector<Object2D*>& arrayObjects, float deltaTime){
     updateStamina(deltaTime);
     updateMovement(arrayObjects, deltaTime);
-    updateRotation(deltaAngleRotation, deltaTime);
+    updateRotation(mouseDelta, deltaTime);
 }
 
 void Player::updateMovement(const vector<Object2D*>& arrayObjects, float deltaTime){
@@ -64,8 +64,13 @@ void Player::updateStamina(float deltaTime){
     else if(stamina < PLAYER_MAX_STAMINA)
         stamina += PLAYER_REGENERATION_STAMINA * deltaTime;
     
-    if(stamina <= 0)
+    if(stamina <= 0){
+        stamina = 0;
         sprintIsAvailable = false;
+    }
+
+    if(stamina > PLAYER_MAX_STAMINA)
+        stamina = PLAYER_MAX_STAMINA;
 
     if(stamina > PLAYER_PART_STAMINA_TO_SHIFT*PLAYER_MAX_STAMINA)
         sprintIsAvailable = true;
@@ -88,8 +93,8 @@ void Player::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{
     window.draw(circle);
 }
 
-void Player::updateRotation(float deltaAngleRotation, float deltaTime){
-     setDirectionGaze(getDirectionGaze() + deltaAngleRotation);
+void Player::updateRotation(float mouseDelta, float deltaTime){
+     setDirectionGaze(getDirectionGaze() + mouseDelta);
 }
 
 void Player::setDirectionGaze(float directionGaze){
@@ -104,18 +109,22 @@ void Player::setStamina(float stamina){
     this->stamina = stamina;
 }
 
-float Player::getDirectionGaze(){
+void Player::setMouseDelta(float mouseDelta){
+    this->mouseDelta = mouseDelta;
+}
+
+float Player::getDirectionGaze() const{
     return directionGaze;
 }
 
-float Player::getSpeed(){
+float Player::getSpeed() const{
     return speed;
 }
 
-float Player::getStamina(){
+float Player::getStamina() const{
     return stamina;
 }
 
-bool Player::getSprintIsAvailable(){
+bool Player::getSprintIsAvailable() const{
     return sprintIsAvailable;
 }

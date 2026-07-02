@@ -4,4 +4,4 @@ obj/Map.o: src/Map.cpp src/../headers/Map.hpp \
  src/../headers/Point2D.hpp src/../headers/RayHit.hpp \
  src/../headers/Player.hpp src/../headers/Circle.hpp \
  src/../headers/Random.hpp src/../headers/Room.hpp \
- src/../headers/CellMap.hpp
+ src/../headers/CellMap.hpp src/../headers/Enemy.hpp

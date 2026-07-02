@@ -44,8 +44,9 @@ class World
         sf::Clock clock;
 
         UI userInterface;
-        Map map;
+        Map mapObj;
         Player* player;
+        Enemy* enemy;
         float currentScreenWidth;
         float currentScreenHeight;
 
@@ -54,6 +55,8 @@ class World
         float currentFPS;
 
         float mouseDelta = 0.0f;
+
+        bool showEnemyOnMinimap = false;
 
         vector<Object2D*> arrayObjects;
         vector<RayHit> rayCastResult;

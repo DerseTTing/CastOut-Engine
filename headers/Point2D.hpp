@@ -23,4 +23,6 @@ class Point2D
     Point2D operator+(const Point2D& point2) const;
     Point2D operator-(const Point2D& point2) const;
     Point2D operator*(float constNumber) const;
+    bool operator==(const Point2D& point2) const;
+    bool operator!=(const Point2D& point2) const;
 };

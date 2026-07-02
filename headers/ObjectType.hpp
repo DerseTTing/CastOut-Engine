@@ -9,5 +9,6 @@ enum class ObjectType
     CircleWallGenerator,
     CircleGenerator,
     Circle,
-    Player
+    Player,
+    Enemy
 };

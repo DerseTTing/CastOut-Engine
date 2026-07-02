@@ -38,6 +38,12 @@ const float PLAYER_VIEWING_ANGLE = 90.0f;
 
 // Настройки врага
 const int ENEMY_RADIUS = 25;
+const int ENEMY_HEIGHT = 150;
+const int ENEMY_SPEED_SEARCH = 440;
+const int ENEMY_SPEED_CHASE = 305;
+const sf::Color ENEMY_COLOR = sf::Color(171, 37, 22);
+const float ENEMY_FOG_DENSITY = 0.001f;
+
 
 // Настройки миникарты
 const float MINIMAP_SHARE_SIZE = 0.3f;
@@ -49,13 +55,13 @@ const float MINIMAP_AREA_SIZE = static_cast<float>(MAP_SIZE_X * MAP_CELL_SIZE);
 const sf::Color MINIMAP_BACK_COLOR = sf::Color(38, 38, 38);
 const sf::Color MINIMAP_RAY_PLAYER_COLOR = sf::Color(15, 115, 0, 200);
 const float MINIMAP_RAY_PLAYER_THICKNESS = 1.0f;
-const float MINIMAP_CHARACTER_SIZE_MULTIPLIER = 3.0f;
+const float MINIMAP_CHARACTER_SIZE_MULTIPLIER = 3.5f;
 
 // Настройки Raycasting
 const int RAY_FREQUENCY_IN_PIXEL = 1;
 
 // Настройки фона
-const float DENSITY = 0.003f;
+const float FOG_DENSITY = 0.003f;
 const sf::Color BACKGROUND_COLOR_NEAR_FLOOR = sf::Color(59, 59, 59);
 const sf::Color BACKGROUND_COLOR_NEAR_CEILING = sf::Color(18, 18, 18);
 const sf::Color BACKGROUND_COLOR_FAR = sf::Color(18, 18, 18);
@@ -71,7 +77,7 @@ const sf::Color STAMINA_BAR_COLOR = sf::Color(219, 219, 219);
 const sf::Color STAMINA_BAR_COLOR_DEFICIENCY = sf::Color(79, 58, 58);
 
 // Вычисляемые параметры
-const float FOV_TANGENT = std::tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
+const float FOV_TANGENT = tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 
 // Организовать нормально шансы генерации комнат
 //

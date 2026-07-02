@@ -5,6 +5,7 @@ vector<Object2D*> Map::generationMap(){
     generationRooms();
     fullRooms();
     generationPlayer();
+    generationEnemy();
 
     return createArrayObjects();
 }
@@ -187,19 +188,40 @@ void Map::generationPlayer(){
     int k = 10000;
 
     while(k > 0){
-        int y = Random::getRandomNumber(1, MAP_SIZE_Y);
-        int x = Random::getRandomNumber(1, MAP_SIZE_X);
+        int y = Random::getRandomNumber(1, MAP_SIZE_Y - 2);
+        int x = Random::getRandomNumber(1, MAP_SIZE_X - 2);
 
         if(map[y][x].objectType == ObjectType::None || map[y][x].objectType == ObjectType::Circle){
             map[y][x].objectType = ObjectType::Player;
             map[y][x].createObject = true;
             return;
         }
+        k--;
     }
 
 
     map[2][2].objectType = ObjectType::Player;
     map[2][2].createObject = true;
+}
+
+void Map::generationEnemy(){
+    int k = 10000;
+
+    while(k > 0){
+        int y = Random::getRandomNumber(1, MAP_SIZE_Y - 2);
+        int x = Random::getRandomNumber(1, MAP_SIZE_X - 2);
+
+        if(map[y][x].objectType == ObjectType::None || map[y][x].objectType == ObjectType::Circle){
+            map[y][x].objectType = ObjectType::Enemy;
+            map[y][x].createObject = true;
+            return;
+        }
+        k--;
+    }
+
+
+    map[MAP_SIZE_Y - 2][MAP_SIZE_X - 2].objectType = ObjectType::Enemy;
+    map[MAP_SIZE_Y - 2][MAP_SIZE_X - 2].createObject = true;
 }
 
 vector<Object2D*> Map::createArrayObjects(){
@@ -279,12 +301,20 @@ vector<Object2D*> Map::createArrayObjects(){
                     Circle* circle = new Circle(position * MAP_CELL_SIZE, radius * MAP_CELL_SIZE, WALL_HEIGHT, WALL_CIRCLE_COLOR, ObjectType::CircleWall);
                     arrayObjects.push_back(circle);
                 }
+                if(objectType == ObjectType::Enemy){
+                    Circle* enemy = new Enemy(position * MAP_CELL_SIZE, ENEMY_RADIUS, ENEMY_HEIGHT, ENEMY_COLOR, ObjectType::Enemy);
+                    arrayObjects.push_back(enemy);
+                }
             }
             else
                 y++;
         }
     }
     return arrayObjects;
+}
+
+const Cell(*Map::getMap())[MAP_SIZE_X]{
+    return map;
 }
 
 void Map::clearMap(){

@@ -6,6 +6,8 @@
 #include "Object2D.hpp"
 #include "Rectangle.hpp"
 #include "RayHit.hpp"
+#include "Player.hpp"
+#include "Enemy.hpp"
 using namespace std;
 
 class UI
@@ -14,6 +16,7 @@ class UI
         sf::RectangleShape minimapBack;
         sf::RectangleShape outline;
         sf::RectangleShape strip;
+        sf::RectangleShape enemyStrip;
         sf::RectangleShape staminaBarBack;
         sf::RectangleShape staminaBar;
         sf::View oldView;
@@ -32,8 +35,9 @@ class UI
     public:
         UI();
         void drawBackground(sf::RenderWindow& window, float currentScreenWidth, float currentScreenHeight);
-        void drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player);
+        void drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player, bool showEnemyOnMinimap);
         void drawRayCastResult(sf::RenderWindow& window, const vector<RayHit>& rayCastResult, float currentScreenWidth, float currentScreenHeight);
         void drawStaminaBar(sf::RenderWindow& window, float currentStamina, float currentScreenWidth, float currentScreenHeight, bool sprintIsAvailable);
+        void drawEnemy(sf::RenderWindow& window, const Enemy& enemy, const Player& player, const vector<RayHit>& rayCastResult, float currentScreenWidth, float currentScreenHeight);
         void drawFPS(sf::RenderWindow& window, float currentFPS, float currentScreenWidth);
 };
