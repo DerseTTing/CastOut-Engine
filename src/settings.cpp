@@ -55,7 +55,7 @@ const float MINIMAP_AREA_SIZE = static_cast<float>(MAP_SIZE_X * MAP_CELL_SIZE);
 const sf::Color MINIMAP_BACK_COLOR = sf::Color(38, 38, 38);
 const sf::Color MINIMAP_RAY_PLAYER_COLOR = sf::Color(15, 115, 0, 200);
 const float MINIMAP_RAY_PLAYER_THICKNESS = 1.0f;
-const float MINIMAP_CHARACTER_SIZE_MULTIPLIER = 3.5f;
+const float MINIMAP_CHARACTER_SIZE_MULTIPLIER = 3.0f;
 
 // Настройки Raycasting
 const int RAY_FREQUENCY_IN_PIXEL = 1;
@@ -82,7 +82,7 @@ const float FOV_TANGENT = tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 // Организовать нормально шансы генерации комнат
 // 
 // Фикс багов (сквозь стены)
-// Отключение миникарты
+// Отключение миникарты (неразрушимых стен)
 // Красный фон при приближении врага
 // Ключи
 // Ранение

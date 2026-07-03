@@ -172,9 +172,10 @@ void UI::drawEnemy(sf::RenderWindow& window, const Enemy& enemy, const Player& p
     float screenX = tan(relativeAngle * DEG_TO_RAD) / FOV_TANGENT;
     int centerEnemyOnScreenX = round((screenX + 1.0f) / 2.0f * currentScreenWidth);
 
-    float halfAngle = atan2f(ENEMY_RADIUS, distanceToEnemy);
-    float spriteHeight = ENEMY_HEIGHT * distanceToProjection / distanceToEnemy;
-    float screenXRight = (ENEMY_RADIUS / distanceToEnemy) / FOV_TANGENT;
+    float correctedDistanceToEnemy = distanceToEnemy * cos(relativeAngle * DEG_TO_RAD);
+    
+    float spriteHeight = ENEMY_HEIGHT * distanceToProjection / correctedDistanceToEnemy;
+    float screenXRight = (ENEMY_RADIUS / correctedDistanceToEnemy) / FOV_TANGENT;
     int spriteRadius = round(screenXRight * currentScreenWidth / 2.0f);
 
     float stepStripX = currentScreenWidth / rayCastResult.size();
@@ -188,7 +189,7 @@ void UI::drawEnemy(sf::RenderWindow& window, const Enemy& enemy, const Player& p
     for(int i = 0; i < rayCastResult.size(); i++){
         float rayAngle = rayCastResult[i].angle;
         float correctedDistanceToEnemy = distanceToEnemy * cos((rayAngle - player.getDirectionGaze()) * DEG_TO_RAD);
-        if(i > centerEnemyOnScreenX - spriteRadius && i < centerEnemyOnScreenX + spriteRadius && rayCastResult[i].distanceWithoutCorrection > correctedDistanceToEnemy){
+        if(i > centerEnemyOnScreenX - spriteRadius && i < centerEnemyOnScreenX + spriteRadius && rayCastResult[i].distanceWithoutCorrection > distanceToEnemy){
             enemyStrip.setSize(sf::Vector2f(stepStripX, spriteHeight));
             enemyStrip.setPosition(i * stepStripX, (currentScreenHeight - spriteHeight)/2);
             enemyStrip.setFillColor(color);
