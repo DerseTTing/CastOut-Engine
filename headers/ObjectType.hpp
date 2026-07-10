@@ -4,6 +4,7 @@ enum class ObjectType
 {
     None,
     RectangleWall,
+    RectangleWallAround,
     Door,
     CircleWall,
     CircleWallGenerator,
@@ -12,3 +13,5 @@ enum class ObjectType
     Player,
     Enemy
 };
+
+// Если меняешь непроходимые типы, обнови Enemy::isWalkableCell()

@@ -40,7 +40,7 @@ void World::runWorld(){
 
 void World::restartWorld(){
     for (int i = 0; i < arrayObjects.size(); i++) {
-        delete arrayObjects[i];
+            delete arrayObjects[i];
     }
     arrayObjects.clear();
     mapObj.clearMap();
@@ -79,7 +79,6 @@ void World::generationMap(){
         }
     }
 
-    enemy->setMap(mapObj.getMap());
     enemy->setPlayer(player);
 }
 
@@ -94,11 +93,14 @@ void World::processingEvent(){
         pauseWorld();
     else if(event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::GainedFocus)
         resumeWorld();
-    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && showEnemyOnMinimap)
-        showEnemyOnMinimap = false;
-    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && !showEnemyOnMinimap)
-        showEnemyOnMinimap = true;
-    
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && showItemOnMinimap)
+        showItemOnMinimap = false;
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && !showItemOnMinimap)
+        showItemOnMinimap = true;
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::M && areaVisionMinimap)
+        areaVisionMinimap = false;
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::M && !areaVisionMinimap)
+        areaVisionMinimap = true;
 
 }
 
@@ -112,10 +114,11 @@ void World::resizedEvent(){
 void World::drawFrame(){
     window.clear();
 
+    userInterface.setEnemyInfo((player->getPositionCenter() - enemy->getPositionCenter()).getLenghtVector() - ENEMY_RADIUS, enemy->getEnemyInChase());
     userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
     userInterface.drawRayCastResult(window, rayCastResult, currentScreenWidth, currentScreenHeight);
     userInterface.drawEnemy(window, *enemy, *player, rayCastResult, currentScreenWidth, currentScreenHeight);
-    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player, showEnemyOnMinimap);
+    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player, mapObj.getMap(), showItemOnMinimap, areaVisionMinimap);
     userInterface.drawStaminaBar(window, player->getStamina(), currentScreenWidth, currentScreenHeight, player->getSprintIsAvailable());
     userInterface.drawFPS(window, currentFPS, currentScreenWidth);
 

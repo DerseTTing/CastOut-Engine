@@ -33,8 +33,8 @@ class Object2D
 
         const Point2D& getPositionCenter() const;
         const sf::Color& getColor() const;
-        ObjectType getObjectType();
-        float getObjectHeight();
+        ObjectType getObjectType() const;
+        float getObjectHeight() const;
 
 
 };

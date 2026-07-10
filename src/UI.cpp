@@ -6,6 +6,9 @@ UI::UI(){
         fpsText.setCharacterSize(15);
         fpsText.setFillColor(sf::Color::Blue);
     }
+
+    rectangleForMinimap = new Rectangle(Point2D(1, 1), 1, 1, 1, WALL_RECTANGLE_COLOR, ObjectType::None);
+    circleForMinimap = new Circle(Point2D(1, 1), 1, 1, WALL_CIRCLE_COLOR, ObjectType::None);
 }
 
 void UI::drawBackground(sf::RenderWindow& window, float currentScreenWidth, float currentScreenHeight){
@@ -44,23 +47,17 @@ void UI::drawBackground(sf::RenderWindow& window, float currentScreenWidth, floa
     window.draw(floor);
 }
 
-void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player, bool showEnemyOnMinimap) {
+void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player, const Cell (*map)[MAP_SIZE_X], bool showItemOnMinimap, bool areaVisionMinimap) {
     minimapChangeView(window);
 
     minimapDrawBackground(window);
 
     minimapDrawPlayerRay(window, rayCastResult, player);
     
-    for (int i = 0; i < arrayObjects.size(); i++){
-        if(arrayObjects[i]->getObjectType() == ObjectType::Enemy){
-            if(showEnemyOnMinimap)
-                arrayObjects[i]->drawOnMinimap(ENEMY_COLOR, window);
-        }
-        else if(arrayObjects[i]->getObjectType() == ObjectType::Player)
-            arrayObjects[i]->drawOnMinimap(PLAYER_COLOR, window);
-        else
-            arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
-    }
+    if(areaVisionMinimap)
+        minimapDrawVisibleObject(window, arrayObjects, map, player);
+    else
+        minimapDrawAllObject(window, arrayObjects, showItemOnMinimap);
 
     window.setView(oldView);
 
@@ -102,6 +99,50 @@ void UI::minimapDrawPlayerRay(sf::RenderWindow& window, const vector<RayHit>& ra
     window.draw(minimapPlayerVisibilityArea);
 }
 
+void UI::minimapDrawAllObject(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, bool showEnemyOnMinimap){
+    for (int i = 0; i < arrayObjects.size(); i++){
+        if(arrayObjects[i]->getObjectType() == ObjectType::Enemy){
+            if(showEnemyOnMinimap)
+                arrayObjects[i]->drawOnMinimap(ENEMY_COLOR, window);
+        }
+        else if(arrayObjects[i]->getObjectType() == ObjectType::Player)
+            arrayObjects[i]->drawOnMinimap(PLAYER_COLOR, window);
+        else
+            arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+    }
+}
+
+void UI::minimapDrawVisibleObject(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const Cell (*map)[MAP_SIZE_X], const Object2D& player){
+    Point2D playerPosition = Point2D(std::floor(player.getPositionCenter().getX() / MAP_CELL_SIZE), std::floor(player.getPositionCenter().getY() / MAP_CELL_SIZE));
+
+    for(int y = 0; y < MAP_SIZE_Y; y++){
+        for(int x = 0; x < MAP_SIZE_X; x++){
+            if((map[y][x].objectType == ObjectType::RectangleWall && (playerPosition - Point2D(x, y)).getLenghtVector() < MINIMAP_BOUNDED_REGION_CELL) || map[y][x].objectType == ObjectType::RectangleWallAround){
+                rectangleForMinimap->setWidth(1 * MAP_CELL_SIZE);
+                rectangleForMinimap->setLength(1 * MAP_CELL_SIZE);
+                rectangleForMinimap->setPositionCenter(Point2D((x + 0.5f) * MAP_CELL_SIZE, (y + 0.5f) * MAP_CELL_SIZE));
+                rectangleForMinimap->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+            }
+
+            if((map[y][x].objectType == ObjectType::CircleGenerator || map[y][x].objectType == ObjectType::CircleWallGenerator) && (playerPosition - Point2D(x, y)).getLenghtVector() < MINIMAP_BOUNDED_REGION_CELL){
+                int sizeCircle = 1;
+                while(map[y][x + sizeCircle].objectType == ObjectType::CircleWall || map[y][x + sizeCircle].objectType == ObjectType::Circle){
+                    sizeCircle++;
+                }
+                circleForMinimap->setRadius(sizeCircle * MAP_CELL_SIZE / 2.0f);
+                circleForMinimap->setPositionCenter(Point2D((x + sizeCircle/2.0f) * MAP_CELL_SIZE, (y + sizeCircle/2.0f) * MAP_CELL_SIZE));
+                circleForMinimap->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+            }
+
+        }
+    }
+
+    circleForMinimap->setRadius(PLAYER_RADIUS * MINIMAP_CHARACTER_SIZE_MULTIPLIER);
+    circleForMinimap->setPositionCenter(Point2D(player.getPositionCenter().getX(), player.getPositionCenter().getY()));
+    circleForMinimap->drawOnMinimap(PLAYER_COLOR, window);
+
+}
+
 void UI::minimapDrawOutline(sf::RenderWindow& window){
     outline.setSize(sf::Vector2f(MINIMAP_SIZE, MINIMAP_SIZE));
     outline.setPosition(0, 0);
@@ -123,6 +164,10 @@ void UI::drawRayCastResult(sf::RenderWindow& window, const vector<RayHit>& rayCa
             
             //Вынести цвет отдельно
             sf::Color color = rayCastResult[i].closestObject->getColor();
+
+            if(enemyInChase)
+                color = getMixingColorExp(color, DANGER_COLOR, factorNearEnemy);
+
             float fogFactor = 1.0f - expf(-distance * FOG_DENSITY);
 
             color.r = color.r * (1 - fogFactor) + BACKGROUND_COLOR_FAR.r * fogFactor;
@@ -182,6 +227,7 @@ void UI::drawEnemy(sf::RenderWindow& window, const Enemy& enemy, const Player& p
 
     float fogFactor = 1.0f - expf(-distanceToEnemy * ENEMY_FOG_DENSITY);
     sf::Color color = ENEMY_COLOR;
+    
     color.r = color.r * (1 - fogFactor) + BACKGROUND_COLOR_FAR.r * fogFactor;
     color.g = color.g * (1 - fogFactor) + BACKGROUND_COLOR_FAR.g * fogFactor;
     color.b = color.b * (1 - fogFactor) + BACKGROUND_COLOR_FAR.b * fogFactor;
@@ -200,8 +246,27 @@ void UI::drawEnemy(sf::RenderWindow& window, const Enemy& enemy, const Player& p
 
 }
 
+sf::Color UI::getMixingColorExp(sf::Color color1, sf::Color color2, float factor){
+    float intensity = exp(-factor * DANGER_DENSITY);
+
+    sf::Uint8 r = static_cast<sf::Uint8>(clamp(color1.r + round((color2.r - color1.r) * intensity), 0.0f, 255.0f));
+    sf::Uint8 g = static_cast<sf::Uint8>(clamp(color1.g + round((color2.g - color1.g) * intensity), 0.0f, 255.0f));
+    sf::Uint8 b = static_cast<sf::Uint8>(clamp(color1.b + round((color2.b - color1.b) * intensity), 0.0f, 255.0f));
+
+    return sf::Color(r, g, b);
+
+}
+
 void UI::drawFPS(sf::RenderWindow& window, float currentFPS, float currentScreenWidth){
     fpsText.setPosition(currentScreenWidth - 62, 5);
     fpsText.setString("FPS: " + std::to_string(static_cast<int>(currentFPS)));
     window.draw(fpsText);
+}
+
+void UI::setEnemyInfo(const float factorNearEnemy, const bool enemyInChase){
+    if(factorNearEnemy < 0)
+        this->factorNearEnemy = 0;
+    else
+        this->factorNearEnemy = factorNearEnemy;
+    this->enemyInChase = enemyInChase;
 }

@@ -39,14 +39,15 @@ const float PLAYER_VIEWING_ANGLE = 90.0f;
 // Настройки врага
 const int ENEMY_RADIUS = 25;
 const int ENEMY_HEIGHT = 150;
-const int ENEMY_SPEED_SEARCH = 440;
-const int ENEMY_SPEED_CHASE = 290;
+const int ENEMY_SPEED_SEARCH = 400;//440;
+const int ENEMY_SPEED_CHASE = 310; //290;
 const sf::Color ENEMY_COLOR = sf::Color(171, 37, 22);
 const float ENEMY_FOG_DENSITY = 0.001f;
 
 
 // Настройки миникарты
 const float MINIMAP_SHARE_SIZE = 0.3f;
+const int MINIMAP_BOUNDED_REGION_CELL = 14;
 const float MINIMAP_SIZE = static_cast<float>(SCREEN_SIZE_Y) * MINIMAP_SHARE_SIZE;
 const float MINIMAP_OUTLINE_THICKNESS = 12.0f;
 const sf::Color MINIMAP_OUTLINE_COLOR = sf::Color(23, 23, 23);
@@ -62,9 +63,11 @@ const int RAY_FREQUENCY_IN_PIXEL = 1;
 
 // Настройки фона
 const float FOG_DENSITY = 0.003f;
+const float DANGER_DENSITY = 0.0008f; // Больше - меньше цвета
 const sf::Color BACKGROUND_COLOR_NEAR_FLOOR = sf::Color(59, 59, 59);
 const sf::Color BACKGROUND_COLOR_NEAR_CEILING = sf::Color(18, 18, 18);
 const sf::Color BACKGROUND_COLOR_FAR = sf::Color(18, 18, 18);
+const sf::Color DANGER_COLOR = sf::Color(97, 5, 2);
 
 // Настройки стамин бара
 const float STAMINA_BAR_SIZE_SHARE_X = 0.01f;
@@ -79,13 +82,32 @@ const sf::Color STAMINA_BAR_COLOR_DEFICIENCY = sf::Color(79, 58, 58);
 // Вычисляемые параметры
 const float FOV_TANGENT = tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 
+
+// Планы:
 // Организовать нормально шансы генерации комнат
+// Пофиксить баг врага при ЛНП > 1
+// Укоротить лучи игрока на миникарте?
+// Видеть врага в режими ограниченой миникарты?
 // 
-// Фикс багов (сквозь стены)
-// Отключение миникарты (неразрушимых стен)
-// Красный фон при приближении врага
+// 
+// 
+//
+// 
+// звук серцебиения при растоянии от врага
 // Ключи
-// Ранение
+// Ранение (снижение стамины и обзора миникарты)
 // Убийство 
-// Выход
+// Выход 
+// Пауза (кнопка возоновить)
+// Текстуры
+// Пошатывание при ходьбе
+//
+// 
+// Сделано:
+// Миникарта радиус вокруг игрока (отрисовка по map)
+// Чит коды
+// Враг в самой дальней точке от игрока (Вынести поиск пути в отдельную функцию)
+// Скорость поиска врага уменьшена (440 -> 400)
+// Скорость погони врага увеличина (290 -> 310)
+//  Индикатор при видинее игрока врагом (красный задник, чем ближе тем краснее) (97, 5, 2)
 //

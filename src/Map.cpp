@@ -14,7 +14,7 @@ void Map::generationWallsAround(){
     for(int y = 0; y < MAP_SIZE_Y; y++){
         for(int x = 0; x < MAP_SIZE_X; x++){
             if(y == 0 || x == 0 || y == MAP_SIZE_Y - 1 || x == MAP_SIZE_X - 1){
-                map[y][x].objectType = ObjectType::RectangleWall;
+                map[y][x].objectType = ObjectType::RectangleWallAround;
                 map[y][x].indestructible = true;
                 map[y][x].createObject = true;
             }
@@ -97,9 +97,9 @@ void Map::cutRoom(Point2D startPosition, bool horizontally, int lengthCut){
         int y = startPosition.getY();
 
         if(map[y][x-1].objectType == ObjectType::Door)
-            fixingWallNearDoor(Point2D(x-1, y), true);
+            fixingWallNearDoor(Point2D(x-1, y));
         if(map[y][x+lengthCut].objectType == ObjectType::Door)
-            fixingWallNearDoor(Point2D(x+lengthCut, y), true);
+            fixingWallNearDoor(Point2D(x+lengthCut, y));
 
         map[y][x-1].indestructible = true;
         map[y][x+lengthCut].indestructible = true;
@@ -119,9 +119,9 @@ void Map::cutRoom(Point2D startPosition, bool horizontally, int lengthCut){
         int y = startPosition.getY();
 
         if(map[y-1][x].objectType == ObjectType::Door)
-            fixingWallNearDoor(Point2D(x, y-1), false);
+            fixingWallNearDoor(Point2D(x, y-1));
         if(map[y+lengthCut][x].objectType == ObjectType::Door)
-            fixingWallNearDoor(Point2D(x, y+lengthCut), false);
+            fixingWallNearDoor(Point2D(x, y+lengthCut));
 
         map[y-1][x].indestructible = true;
         map[y+lengthCut][x].indestructible = true;
@@ -138,19 +138,13 @@ void Map::cutRoom(Point2D startPosition, bool horizontally, int lengthCut){
     }
 }
 
-void Map::fixingWallNearDoor(const Point2D& positionDoor, bool horizontally){
+void Map::fixingWallNearDoor(const Point2D& positionDoor){
     int posDoorX = positionDoor.getX();
     int posDoorY = positionDoor.getY();
-    if(horizontally){
-        map[posDoorY][posDoorX].createObject = true;
-        map[posDoorY][posDoorX].indestructible = true;
-        map[posDoorY][posDoorX].objectType = ObjectType::RectangleWall;
-    }
-    else{
-        map[posDoorY][posDoorX].createObject = true;
-        map[posDoorY][posDoorX].indestructible = true;
-        map[posDoorY][posDoorX].objectType = ObjectType::RectangleWall;
-    }
+
+    map[posDoorY][posDoorX].createObject = true;
+    map[posDoorY][posDoorX].indestructible = true;
+    map[posDoorY][posDoorX].objectType = ObjectType::RectangleWall;
 }
 
 
@@ -194,6 +188,7 @@ void Map::generationPlayer(){
         if(map[y][x].objectType == ObjectType::None || map[y][x].objectType == ObjectType::Circle){
             map[y][x].objectType = ObjectType::Player;
             map[y][x].createObject = true;
+            map[y][x].indestructible = true;
             return;
         }
         k--;
@@ -205,23 +200,19 @@ void Map::generationPlayer(){
 }
 
 void Map::generationEnemy(){
-    int k = 10000;
-
-    while(k > 0){
-        int y = Random::getRandomNumber(1, MAP_SIZE_Y - 2);
-        int x = Random::getRandomNumber(1, MAP_SIZE_X - 2);
-
-        if(map[y][x].objectType == ObjectType::None || map[y][x].objectType == ObjectType::Circle){
-            map[y][x].objectType = ObjectType::Enemy;
-            map[y][x].createObject = true;
-            return;
+    Point2D positionPlayer;
+    for(int y = 0; y < MAP_SIZE_Y; y++){
+        for(int x = 0; x < MAP_SIZE_X;x++){
+            if(map[y][x].objectType == ObjectType::Player)
+            positionPlayer = Point2D(x, y);
         }
-        k--;
     }
+    
+    PathFinding pathFinding(map);
 
-
-    map[MAP_SIZE_Y - 2][MAP_SIZE_X - 2].objectType = ObjectType::Enemy;
-    map[MAP_SIZE_Y - 2][MAP_SIZE_X - 2].createObject = true;
+    Point2D positionEnemy = pathFinding.getFarWalkableCell(positionPlayer);
+    map[(int)positionEnemy.getY()][(int)positionEnemy.getX()].objectType = ObjectType::Enemy;
+    map[(int)positionEnemy.getY()][(int)positionEnemy.getX()].createObject = true;
 }
 
 vector<Object2D*> Map::createArrayObjects(){
@@ -238,7 +229,7 @@ vector<Object2D*> Map::createArrayObjects(){
                     x++;
                 }
 
-                if(sizeX > 1 && objectType == ObjectType::RectangleWall) {
+                if(sizeX > 1 && (objectType == ObjectType::RectangleWall || objectType == ObjectType::RectangleWallAround)){
                 
                     for(int i = startX; i < startX + sizeX; i++)
                         map[y][i].createObject = false;
@@ -247,6 +238,10 @@ vector<Object2D*> Map::createArrayObjects(){
 
                     if(objectType == ObjectType::RectangleWall){
                         Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, sizeX * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
+                        arrayObjects.push_back(rectangle);
+                    }
+                    if(objectType == ObjectType::RectangleWallAround){
+                        Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, sizeX * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWallAround); 
                         arrayObjects.push_back(rectangle);
                     }
                 }
@@ -262,7 +257,7 @@ vector<Object2D*> Map::createArrayObjects(){
                 ObjectType objectType = map[y][x].objectType;
                 int startY = y;
                 int sizeY = 0;
-                if(objectType == ObjectType::RectangleWall){
+                if(objectType == ObjectType::RectangleWall || objectType == ObjectType::RectangleWallAround){
                     while(y < MAP_SIZE_Y && map[y][x].createObject == true && map[y][x].objectType == objectType){
                         sizeY++;
                         y++;
@@ -282,8 +277,13 @@ vector<Object2D*> Map::createArrayObjects(){
                     Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
                     arrayObjects.push_back(rectangle);
                 }
+                if(objectType == ObjectType::RectangleWallAround){
+                    Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWallAround); 
+                    arrayObjects.push_back(rectangle);
+                }
                 if(objectType == ObjectType::Player){
-                    Circle* player = new Player(position * MAP_CELL_SIZE, PLAYER_RADIUS, WALL_HEIGHT, PLAYER_COLOR, ObjectType::Player);
+                    Player* player = new Player(position * MAP_CELL_SIZE, PLAYER_RADIUS, WALL_HEIGHT, PLAYER_COLOR, ObjectType::Player);
+                    this->player = player;
                     arrayObjects.push_back(player);
                 }
                 if(objectType == ObjectType::CircleGenerator || objectType == ObjectType::CircleWallGenerator){
@@ -302,7 +302,10 @@ vector<Object2D*> Map::createArrayObjects(){
                     arrayObjects.push_back(circle);
                 }
                 if(objectType == ObjectType::Enemy){
-                    Circle* enemy = new Enemy(position * MAP_CELL_SIZE, ENEMY_RADIUS, ENEMY_HEIGHT, ENEMY_COLOR, ObjectType::Enemy);
+                    Enemy* enemy = new Enemy(position * MAP_CELL_SIZE, ENEMY_RADIUS, ENEMY_HEIGHT, ENEMY_COLOR, ObjectType::Enemy);
+                    PathFinding* pathFinding = new PathFinding(map);
+                    enemy->setPathFinding(pathFinding);
+                    this->enemy = enemy;
                     arrayObjects.push_back(enemy);
                 }
             }
@@ -310,6 +313,9 @@ vector<Object2D*> Map::createArrayObjects(){
                 y++;
         }
     }
+
+    enemy->setPlayer(player);
+
     return arrayObjects;
 }
 

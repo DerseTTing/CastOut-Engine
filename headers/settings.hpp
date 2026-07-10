@@ -57,6 +57,7 @@ extern const float ENEMY_FOG_DENSITY;
 
 // Настройки миникарты
 extern const float MINIMAP_SHARE_SIZE;
+extern const int MINIMAP_BOUNDED_REGION_CELL;
 extern const float MINIMAP_SIZE;
 extern const float MINIMAP_OUTLINE_THICKNESS;
 extern const sf::Color MINIMAP_OUTLINE_COLOR;
@@ -73,9 +74,11 @@ extern const int RAY_FREQUENCY_IN_PIXEL;
 
 // Настройка фона
 extern const float FOG_DENSITY;
+extern const float DANGER_DENSITY;
 extern const sf::Color BACKGROUND_COLOR_NEAR_FLOOR;
 extern const sf::Color BACKGROUND_COLOR_NEAR_CEILING;
 extern const sf::Color BACKGROUND_COLOR_FAR;
+extern const sf::Color DANGER_COLOR;
 
 // Настройки стамин бара
 extern const float STAMINA_BAR_SIZE_SHARE_X;

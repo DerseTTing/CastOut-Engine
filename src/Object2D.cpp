@@ -26,10 +26,10 @@ const sf::Color& Object2D::getColor() const{
     return color;
 }
 
-ObjectType Object2D::getObjectType(){
+ObjectType Object2D::getObjectType() const{
     return objectType;
 }
 
-float Object2D::getObjectHeight(){
+float Object2D::getObjectHeight() const{
     return objectHeight;
 }

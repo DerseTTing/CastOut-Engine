@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <vector>
 #include "Object2D.hpp"
 #include "settings.hpp"
@@ -56,7 +57,8 @@ class World
 
         float mouseDelta = 0.0f;
 
-        bool showEnemyOnMinimap = false;
+        bool showItemOnMinimap = false;
+        bool areaVisionMinimap = true;
 
         vector<Object2D*> arrayObjects;
         vector<RayHit> rayCastResult;

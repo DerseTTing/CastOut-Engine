@@ -8,6 +8,7 @@
 #include "Room.hpp"
 #include "CellMap.hpp"
 #include "Enemy.hpp"
+#include "PathFinding.hpp"
 
 
 class Map
@@ -17,11 +18,14 @@ class Map
         Cell map[MAP_SIZE_Y][MAP_SIZE_X];
         vector<Room> rooms;
 
+        Player* player;
+        Enemy* enemy;
+
 
         void generationWallsAround();
         void generationRooms();
         void cutRoom(Point2D startPosition, bool horizontally, int lengthCut);
-        void fixingWallNearDoor(const Point2D& positionDoor, bool horizontally);
+        void fixingWallNearDoor(const Point2D& positionDoor);
         vector<int> getDoorPlaces(int lengthWall);
         void fullRooms();
         void generationPlayer();
@@ -37,5 +41,3 @@ class Map
         void clearMap();
 
 };
-
-// Разбить на гетеры и генерацию?

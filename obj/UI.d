@@ -3,4 +3,5 @@ obj/UI.o: src/UI.cpp src/../headers/UI.hpp src/../headers/settings.hpp \
  src/../headers/ObjectType.hpp src/../headers/RayHit.hpp \
  src/../headers/Rectangle.hpp src/../headers/Player.hpp \
  src/../headers/Circle.hpp src/../headers/Enemy.hpp \
- src/../headers/CellMap.hpp src/../headers/Random.hpp
+ src/../headers/CellMap.hpp src/../headers/Random.hpp \
+ src/../headers/PathFinding.hpp
