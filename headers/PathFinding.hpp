@@ -24,7 +24,6 @@ class PathFinding{
 
         CellPath pathMap[MAP_SIZE_Y][MAP_SIZE_X];
 
-        bool isWalkableCell(int posX, int posY) const;
         void fillWalkableCell();
 
         void resetPathMap();

@@ -6,6 +6,8 @@ vector<Object2D*> Map::generationMap(){
     fullRooms();
     generationPlayer();
     generationEnemy();
+    generationKey();
+
 
     return createArrayObjects();
 }
@@ -180,23 +182,25 @@ void Map::fullRooms(){
 
 void Map::generationPlayer(){
     int k = 10000;
+    vector<Point2D> cellForPlayer;
 
-    while(k > 0){
-        int y = Random::getRandomNumber(1, MAP_SIZE_Y - 2);
-        int x = Random::getRandomNumber(1, MAP_SIZE_X - 2);
-
-        if(map[y][x].objectType == ObjectType::None || map[y][x].objectType == ObjectType::Circle){
-            map[y][x].objectType = ObjectType::Player;
-            map[y][x].createObject = true;
-            map[y][x].indestructible = true;
-            return;
+    for(int yCell = 0; yCell < MAP_SIZE_Y; yCell++){
+        for(int xCell = 0; xCell < MAP_SIZE_X; xCell++){
+            if(ObjectTypeRules::isPlaceForGeneration(map[yCell][xCell].objectType))
+                cellForPlayer.push_back(Point2D(xCell, yCell));
         }
-        k--;
+    }
+    if(cellForPlayer.size() != 0){
+        int idCell = Random::getRandomNumber(0, cellForPlayer.size() - 1);
+        Point2D selectCellForPlayer = cellForPlayer[idCell];
+        map[(int)selectCellForPlayer.getY()][(int)selectCellForPlayer.getX()].createObject = true;
+        map[(int)selectCellForPlayer.getY()][(int)selectCellForPlayer.getX()].objectType = ObjectType::Player;
+    }
+    else{
+        map[2][2].objectType = ObjectType::Player;
+        map[2][2].createObject = true;
     }
 
-
-    map[2][2].objectType = ObjectType::Player;
-    map[2][2].createObject = true;
 }
 
 void Map::generationEnemy(){
@@ -213,6 +217,69 @@ void Map::generationEnemy(){
     Point2D positionEnemy = pathFinding.getFarWalkableCell(positionPlayer);
     map[(int)positionEnemy.getY()][(int)positionEnemy.getX()].objectType = ObjectType::Enemy;
     map[(int)positionEnemy.getY()][(int)positionEnemy.getX()].createObject = true;
+}
+
+void Map::generationKey(){
+    int sizeMap = max(MAP_SIZE_X, MAP_SIZE_Y);
+    int keyNearArea = sizeMap / KEY_COUNT * 2;
+
+
+    vector<Point2D> addedKeys;
+    vector<Point2D> cellForKey;
+    vector<Point2D> cellForKeyReserve;
+
+    for(int yCell = 0; yCell < MAP_SIZE_Y; yCell++){
+        for(int xCell = 0; xCell < MAP_SIZE_X; xCell++){
+            if(ObjectTypeRules::isPlaceForGeneration(map[yCell][xCell].objectType)){
+                cellForKey.push_back(Point2D(xCell, yCell));
+                cellForKeyReserve.push_back(Point2D(xCell, yCell));
+            }
+        }
+    }
+
+    while(addedKeys.size() != KEY_COUNT && cellForKey.size() + cellForKeyReserve.size() > 0){
+        
+        if(addedKeys.size() != 0){
+            for(int idCell = cellForKey.size() - 1; idCell >= 0; idCell--){
+                if((cellForKey[idCell] - addedKeys.back()).getLenghtVector() < keyNearArea){
+                    cellForKey.erase(cellForKey.begin() + idCell);
+                }
+            }
+
+        }
+
+
+        if(cellForKey.size() != 0){
+            int idCell = Random::getRandomNumber(0, cellForKey.size() - 1);
+            Point2D selectCellForKey = cellForKey[idCell];
+
+            addedKeys.push_back(selectCellForKey);
+            map[(int)selectCellForKey.getY()][(int)selectCellForKey.getX()].createObject = true;
+            map[(int)selectCellForKey.getY()][(int)selectCellForKey.getX()].objectType = ObjectType::Key;
+
+            cellForKey.erase(cellForKey.begin() + idCell);
+
+            for(int i = 0; i < cellForKeyReserve.size(); i++){
+                if(cellForKeyReserve[i] == selectCellForKey)
+                    cellForKeyReserve.erase(cellForKeyReserve.begin() + i);
+            }
+
+        }
+        else if(cellForKeyReserve.size() != 0){
+            int idCell = Random::getRandomNumber(0, cellForKeyReserve.size() - 1);
+            Point2D selectCellForKey = cellForKeyReserve[idCell];
+
+            addedKeys.push_back(selectCellForKey);
+            map[(int)selectCellForKey.getY()][(int)selectCellForKey.getX()].createObject = true;
+            map[(int)selectCellForKey.getY()][(int)selectCellForKey.getX()].objectType = ObjectType::Key;
+
+            cellForKeyReserve.erase(cellForKeyReserve.begin() + idCell);
+
+        }
+        else
+            return;
+            
+    }
 }
 
 vector<Object2D*> Map::createArrayObjects(){
@@ -307,6 +374,10 @@ vector<Object2D*> Map::createArrayObjects(){
                     enemy->setPathFinding(pathFinding);
                     this->enemy = enemy;
                     arrayObjects.push_back(enemy);
+                }
+                if(objectType == ObjectType::Key){
+                    Key* key = new Key(position * MAP_CELL_SIZE, KEY_RADIUS, KEY_HEIGHT, KEY_COLOR, ObjectType::Key);
+                    arrayObjects.push_back(key);
                 }
             }
             else

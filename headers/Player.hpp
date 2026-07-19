@@ -11,6 +11,8 @@ class Player : public Circle
         float mouseDelta;
         bool sprintIsAvailable = true;
 
+        int countCollectedKey = 0;
+
 
         void updateMovement(const vector<Object2D*>& arrayObjects, float deltaTime);
         void updateRotation(float deltaAngleRotation, float deltaTime);
@@ -27,9 +29,11 @@ class Player : public Circle
         void setSpeed(float speed);
         void setStamina(float stamina);
         void setMouseDelta(float mouseDelta);
+        void setCountCollectedKey(int countCollectedKey);
         
         float getDirectionGaze() const;
         float getSpeed() const;
         float getStamina() const;
         bool getSprintIsAvailable() const;
+        int getCountCollectedKey() const;
 };

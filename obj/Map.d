@@ -5,4 +5,4 @@ obj/Map.o: src/Map.cpp src/../headers/Map.hpp \
  src/../headers/Player.hpp src/../headers/Circle.hpp \
  src/../headers/Random.hpp src/../headers/Room.hpp \
  src/../headers/CellMap.hpp src/../headers/Enemy.hpp \
- src/../headers/PathFinding.hpp
+ src/../headers/PathFinding.hpp src/../headers/Key.hpp

@@ -5,5 +5,5 @@ obj/main.o: src/main.cpp src/../headers/World.hpp \
  src/../headers/UI.hpp src/../headers/Player.hpp \
  src/../headers/Circle.hpp src/../headers/Enemy.hpp \
  src/../headers/CellMap.hpp src/../headers/Random.hpp \
- src/../headers/PathFinding.hpp src/../headers/Map.hpp \
- src/../headers/Room.hpp
+ src/../headers/PathFinding.hpp src/../headers/Key.hpp \
+ src/../headers/Map.hpp src/../headers/Room.hpp

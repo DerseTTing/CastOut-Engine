@@ -27,12 +27,15 @@ class Enemy : public Circle
         Point2D lastPlayerPosition;
 
         bool enemyInChase = false;
+        bool enemyInCarefullyMode = false;
 
     public:
         Enemy(const Point2D& positionCenter, float radius, float objectHeight, sf::Color color, ObjectType objectType);
         ~Enemy();
 
         void updateObject(const vector<Object2D*>& arrayObjects, float deltaTime) override;
+
+        void foundCarefullyModeTarget(const Point2D& positionTarget);
 
         void drawOnMinimap(sf::Color color, sf::RenderWindow& window) const override;
 
@@ -41,5 +44,7 @@ class Enemy : public Circle
         void setPathFinding(PathFinding* pathFinding);
 
         bool getEnemyInChase();
+
+        bool getEnemyInCarefullyMode();
 
 };

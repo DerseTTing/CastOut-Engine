@@ -39,11 +39,28 @@ const float PLAYER_VIEWING_ANGLE = 90.0f;
 // Настройки врага
 const int ENEMY_RADIUS = 25;
 const int ENEMY_HEIGHT = 150;
-const int ENEMY_SPEED_SEARCH = 400;//440;
-const int ENEMY_SPEED_CHASE = 310; //290;
+const int ENEMY_SPEED_SEARCH = 200;//400;
+const int ENEMY_SPEED_CHASE = 200; //310;
 const sf::Color ENEMY_COLOR = sf::Color(171, 37, 22);
 const float ENEMY_FOG_DENSITY = 0.001f;
 
+// Настройки ключа
+const int KEY_COUNT = 5;
+const int KEY_RADIUS = 18;
+const int KEY_HEIGHT = 150;
+const float KEY_PICK_UP_RADIUS = KEY_RADIUS + PLAYER_RADIUS - 10;
+const sf::Color KEY_COLOR = sf::Color(179, 173, 0);
+
+// Настройки счетчика ключей
+const int COUNTER_KEY_TEXT_SIZE = 28;
+const float COUNTER_KEY_BACKGROUND_SHARE_POSITION_X = 1.0f - COUNTER_KEY_BACKGROUND_SHARE_SIZE_X;
+const float COUNTER_KEY_BACKGROUND_SHARE_POSITION_Y = 1.0f - COUNTER_KEY_BACKGROUND_SHARE_SIZE_Y;
+const float COUNTER_KEY_BACKGROUND_SHARE_SIZE_X = 0.15f;
+const float COUNTER_KEY_BACKGROUND_SHARE_SIZE_Y = 0.075f;
+const float COUNTER_KEY_TEXT_SHARE_POSITION_X = COUNTER_KEY_BACKGROUND_SHARE_POSITION_X + 0.048f;
+const float COUNTER_KEY_TEXT_SHARE_POSITION_Y = COUNTER_KEY_BACKGROUND_SHARE_POSITION_Y +  0.025f;
+const sf::Color COUNTER_KEY_TEXT_COLOR = sf::Color::Blue;
+const sf::Color COUNTER_KEY_BACKGROUND_COLOR = sf::Color(38, 38, 38);
 
 // Настройки миникарты
 const float MINIMAP_SHARE_SIZE = 0.3f;
@@ -56,7 +73,7 @@ const float MINIMAP_AREA_SIZE = static_cast<float>(MAP_SIZE_X * MAP_CELL_SIZE);
 const sf::Color MINIMAP_BACK_COLOR = sf::Color(38, 38, 38);
 const sf::Color MINIMAP_RAY_PLAYER_COLOR = sf::Color(15, 115, 0, 200);
 const float MINIMAP_RAY_PLAYER_THICKNESS = 1.0f;
-const float MINIMAP_CHARACTER_SIZE_MULTIPLIER = 3.0f;
+const float MINIMAP_CHARACTER_SIZE_MULTIPLIER = 4.0f;
 
 // Настройки Raycasting
 const int RAY_FREQUENCY_IN_PIXEL = 1;
@@ -68,6 +85,8 @@ const sf::Color BACKGROUND_COLOR_NEAR_FLOOR = sf::Color(59, 59, 59);
 const sf::Color BACKGROUND_COLOR_NEAR_CEILING = sf::Color(18, 18, 18);
 const sf::Color BACKGROUND_COLOR_FAR = sf::Color(18, 18, 18);
 const sf::Color DANGER_COLOR = sf::Color(97, 5, 2);
+const sf::Color CAREFULLY_COLOR = sf::Color(181, 109, 0);
+
 
 // Настройки стамин бара
 const float STAMINA_BAR_SIZE_SHARE_X = 0.01f;
@@ -85,29 +104,45 @@ const float FOV_TANGENT = tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 
 // Планы:
 // Организовать нормально шансы генерации комнат
-// Пофиксить баг врага при ЛНП > 1
 // Укоротить лучи игрока на миникарте?
 // Видеть врага в режими ограниченой миникарты?
-// 
-// 
+// Ключи на миникарте?
+// Скорость врага медленее сразу после погони
+// При высоком ЛНП высота правой границы спрайта прыгает + неполная полоска не учитывает стоящий сзади спрайт врага
 // 
 //
+// звук при подборе ключа. Желтые стены
 // 
-// звук серцебиения при растоянии от врага
-// Ключи
-// Ранение (снижение стамины и обзора миникарты)
+// Ключи. Отображение их по верх экрана (как враг). Добавить апдейт обджикт сравнение на растояние с игроком. UI счетчик всех ключей(где хранить счетчик?)
+// мб сделать ключи ниже по высоте
+// Цель на ключ при подборе + окрас стен.
+// 
+// Ранение (снижение стамины и обзора миникарты, темнее миникарта)
 // Убийство 
 // Выход 
+// Предмет телепортирующий врага
+// Предмет открывающий миникарту
+// Враг мешающий обзору
+// Пошатывание при ходьбе
+// Оружие после выхода
+// Новые комнаты
+// Ловушка понижающее качество
+// Меню победы
+// меню запуска
+// звук серцебиения при растоянии от врага
 // Пауза (кнопка возоновить)
 // Текстуры
-// Пошатывание при ходьбе
+// Лупп (+враг,- ключ). между ними магазин
+// червоточины
+// Таймер
 //
 // 
 // Сделано:
-// Миникарта радиус вокруг игрока (отрисовка по map)
-// Чит коды
-// Враг в самой дальней точке от игрока (Вынести поиск пути в отдельную функцию)
-// Скорость поиска врага уменьшена (440 -> 400)
-// Скорость погони врага увеличина (290 -> 310)
-//  Индикатор при видинее игрока врагом (красный задник, чем ближе тем краснее) (97, 5, 2)
+// На врага тоже теперь действует туман
+// При высоком ЛНП
+// Спрайты ключей, которые корректно отображаются когда их много и генерацию равномерную
+// Счетчик ключей
+// Враг идет на последнюю точку ключа + желтый цвет стен
+//
+//
 //

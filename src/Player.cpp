@@ -20,7 +20,7 @@ void Player::updateMovement(const vector<Object2D*>& arrayObjects, float deltaTi
 
     if(!(moveVector.getX() == 0 && moveVector.getY() == 0)){
         for(int i = 0; i < arrayObjects.size(); i++){
-            if(arrayObjects[i]->getObjectType() != ObjectType::Player){
+            if(!ObjectTypeRules::isPlayerNotCoolisionTypeObject(arrayObjects[i]->getObjectType())){
                 Point2D pushOut = arrayObjects[i]->distanceToObject(targetPosition, radius);
                 if (pushOut.getX() != 0 || pushOut.getY() != 0) {
                     targetPosition = targetPosition + pushOut;
@@ -113,6 +113,11 @@ void Player::setMouseDelta(float mouseDelta){
     this->mouseDelta = mouseDelta;
 }
 
+void Player::setCountCollectedKey(int countCollectedKey){
+    this->countCollectedKey = countCollectedKey;
+}
+
+
 float Player::getDirectionGaze() const{
     return directionGaze;
 }
@@ -127,4 +132,8 @@ float Player::getStamina() const{
 
 bool Player::getSprintIsAvailable() const{
     return sprintIsAvailable;
+}
+
+int Player::getCountCollectedKey() const{
+    return countCollectedKey;
 }

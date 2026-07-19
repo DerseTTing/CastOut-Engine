@@ -16,6 +16,8 @@ class Object2D
         ObjectType objectType;
         float objectHeight;
 
+        bool markedForDeletion = false;
+
         virtual void updateAngle() = 0;
 
     public:
@@ -35,6 +37,7 @@ class Object2D
         const sf::Color& getColor() const;
         ObjectType getObjectType() const;
         float getObjectHeight() const;
+        bool getMarkedForDeletion() const;
 
 
 };

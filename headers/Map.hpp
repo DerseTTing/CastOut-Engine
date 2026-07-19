@@ -9,6 +9,7 @@
 #include "CellMap.hpp"
 #include "Enemy.hpp"
 #include "PathFinding.hpp"
+#include "Key.hpp"
 
 
 class Map
@@ -30,6 +31,7 @@ class Map
         void fullRooms();
         void generationPlayer();
         void generationEnemy();
+        void generationKey();
 
         vector<Object2D*> createArrayObjects();
 

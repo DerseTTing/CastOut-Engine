@@ -16,6 +16,7 @@ void Enemy::updateObject(const vector<Object2D*>& arrayObjects, float deltaTime)
     else if(listStepToTarget.size() == 0)
         foundNewRandomTarget();
 
+
     if(listStepToTarget.size() != 0)
         goToNextStep(deltaTime);       
 }
@@ -54,7 +55,9 @@ void Enemy::goToNextStep(float deltaTime){
 
 void Enemy::foundNewRandomTarget(){
     speed = ENEMY_SPEED_SEARCH;
+    lastPlayerPosition = Point2D(-1, -1);
     enemyInChase = false;
+    enemyInCarefullyMode = false;
 
     Point2D positionCenterInCell = Point2D(floor(positionCenter.getX() / MAP_CELL_SIZE), floor(positionCenter.getY() / MAP_CELL_SIZE));
 
@@ -90,6 +93,7 @@ bool Enemy::enemySeePlayer(const vector<Object2D*>& arrayObjects) const{
 void Enemy::foundChaseTarget(const vector<Object2D*>& arrayObjects){
     speed = ENEMY_SPEED_CHASE;
     enemyInChase = true;
+    enemyInCarefullyMode = false;
 
     Point2D newLastPlayerPosition = Point2D(floor(player->getPositionCenter().getX() / MAP_CELL_SIZE), floor(player->getPositionCenter().getY() / MAP_CELL_SIZE));
     Point2D positionCenterInCell = Point2D(floor(positionCenter.getX() / MAP_CELL_SIZE), floor(positionCenter.getY() / MAP_CELL_SIZE));
@@ -98,6 +102,15 @@ void Enemy::foundChaseTarget(const vector<Object2D*>& arrayObjects){
         lastPlayerPosition = newLastPlayerPosition;
     }
 
+}
+
+void Enemy::foundCarefullyModeTarget(const Point2D& positionTarget){
+    Point2D positionCenterInCell = Point2D(floor(positionCenter.getX() / MAP_CELL_SIZE), floor(positionCenter.getY() / MAP_CELL_SIZE));
+    Point2D positionTargetInCell = Point2D(floor(positionTarget.getX() / MAP_CELL_SIZE), floor(positionTarget.getY() / MAP_CELL_SIZE));
+
+    listStepToTarget = pathFinding->fillListStepToTarget(positionCenterInCell, &positionTargetInCell);
+
+    enemyInCarefullyMode = true;
 }
 
 void Enemy::setPlayer(const Player* player){
@@ -110,4 +123,8 @@ void Enemy::setPathFinding(PathFinding* pathFinding){
 
 bool Enemy::getEnemyInChase(){
     return enemyInChase;
+}
+
+bool Enemy::getEnemyInCarefullyMode(){
+    return enemyInCarefullyMode;
 }

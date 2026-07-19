@@ -31,6 +31,7 @@ class World
         void resizedEvent();
 
         void updateObjects();
+        void checkDeleteObject();
 
         void resetMouseDelta();
 
@@ -57,13 +58,19 @@ class World
 
         float mouseDelta = 0.0f;
 
-        bool showItemOnMinimap = false;
+        bool showHiddenObjectsOnMinimap = false;
         bool areaVisionMinimap = true;
 
         vector<Object2D*> arrayObjects;
         vector<RayHit> rayCastResult;
+        vector<EdgeHit> findEdges;
         float deltaTime;
+
+        int countRays;
+        float stepStripX;
+
 
         RayHit findClosestIntersection(Point2D startPoint, float currentAngle, Point2D& directionVector);
         RayHit createRayHit(float minDistance, float currentAngle, Object2D* closestObject);
+        void searchEdges();
 };

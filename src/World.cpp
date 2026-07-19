@@ -4,8 +4,7 @@ World::World()
     : window(sf::VideoMode(SCREEN_SIZE_X, SCREEN_SIZE_Y), "CastOut"){
     view = window.getDefaultView();
 
-    currentScreenWidth = SCREEN_SIZE_X;
-    currentScreenHeight = SCREEN_SIZE_Y;
+    resizedEvent();
 
     window.setMouseCursorVisible(false);
     window.setMouseCursorGrabbed(true);
@@ -93,10 +92,10 @@ void World::processingEvent(){
         pauseWorld();
     else if(event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::GainedFocus)
         resumeWorld();
-    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && showItemOnMinimap)
-        showItemOnMinimap = false;
-    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && !showItemOnMinimap)
-        showItemOnMinimap = true;
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && showHiddenObjectsOnMinimap)
+        showHiddenObjectsOnMinimap = false;
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && !showHiddenObjectsOnMinimap)
+        showHiddenObjectsOnMinimap = true;
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::M && areaVisionMinimap)
         areaVisionMinimap = false;
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::M && !areaVisionMinimap)
@@ -109,18 +108,25 @@ void World::resizedEvent(){
     currentScreenHeight = event.size.height;
     view = sf::View(sf::FloatRect(0, 0, currentScreenWidth, currentScreenHeight));
     window.setView(view);
+    
+
+    countRays = static_cast<int>(ceil(currentScreenWidth / (float)RAY_FREQUENCY_IN_PIXEL));
+    stepStripX = currentScreenWidth / (float)countRays;
+
+    userInterface.setScreenInfo(currentScreenWidth, currentScreenHeight, stepStripX);
 }
 
 void World::drawFrame(){
     window.clear();
 
-    userInterface.setEnemyInfo((player->getPositionCenter() - enemy->getPositionCenter()).getLenghtVector() - ENEMY_RADIUS, enemy->getEnemyInChase());
-    userInterface.drawBackground(window, currentScreenWidth, currentScreenHeight);
-    userInterface.drawRayCastResult(window, rayCastResult, currentScreenWidth, currentScreenHeight);
-    userInterface.drawEnemy(window, *enemy, *player, rayCastResult, currentScreenWidth, currentScreenHeight);
-    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player, mapObj.getMap(), showItemOnMinimap, areaVisionMinimap);
-    userInterface.drawStaminaBar(window, player->getStamina(), currentScreenWidth, currentScreenHeight, player->getSprintIsAvailable());
-    userInterface.drawFPS(window, currentFPS, currentScreenWidth);
+    userInterface.setEnemyInfo((player->getPositionCenter() - enemy->getPositionCenter()).getLenghtVector() - ENEMY_RADIUS, enemy->getEnemyInChase(), enemy->getEnemyInCarefullyMode());
+    userInterface.drawBackground(window);
+    userInterface.drawRayCastResult(window, rayCastResult, findEdges);
+    userInterface.drawAllSprites(window, arrayObjects, rayCastResult);
+    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player, mapObj.getMap(), showHiddenObjectsOnMinimap, areaVisionMinimap);
+    userInterface.drawStaminaBar(window, player->getStamina(), player->getSprintIsAvailable());
+    userInterface.drawCounterKey(window, *player);
+    userInterface.drawFPS(window, currentFPS);
 
     window.display();
 }
@@ -132,6 +138,16 @@ void World::updateObjects(){
 
     for(int i = 0; i < arrayObjects.size(); i++){
         arrayObjects[i]->updateObject(arrayObjects, deltaTime);
+    }
+    checkDeleteObject();
+}
+
+void World::checkDeleteObject(){
+    for(int i = arrayObjects.size() - 1; i >= 0; i--){
+        if(arrayObjects[i]->getMarkedForDeletion()){
+            delete(arrayObjects[i]);
+            arrayObjects.erase(arrayObjects.begin() + i);
+        }
     }
 }
 
@@ -156,8 +172,10 @@ void World::resetMouseDelta(){
 
 void World::castRay(Point2D startPointRay, float directionGaze){
     rayCastResult.clear();
-    for(int i = 0; i < currentScreenWidth; i += RAY_FREQUENCY_IN_PIXEL){
-        float screenX = 2.0f * i / (float)currentScreenWidth - 1.0f;
+
+    for(int k = 0; k < countRays; k++){
+        float pixelX = k * stepStripX;
+        float screenX = 2.0f * pixelX / (float)currentScreenWidth - 1.0f;
         float relativeAngle = atanf(screenX * FOV_TANGENT) * RAD_TO_DEG;
         float currentAngle = player->getDirectionGaze() + relativeAngle;
 
@@ -167,13 +185,56 @@ void World::castRay(Point2D startPointRay, float directionGaze){
 
         rayCastResult.push_back(hit);
     }
+    searchEdges();
 }
+
+void World::searchEdges(){
+    findEdges.clear();
+
+    for(int i = 0; i < rayCastResult.size() - 1; i++){
+        if(rayCastResult[i].hit && rayCastResult[i + 1].hit && rayCastResult[i].closestObject != rayCastResult[i+1].closestObject){
+            float angleLeft  = rayCastResult[i].angle;
+            float angleRight = rayCastResult[i+1].angle;
+            Object2D* objLeft = rayCastResult[i].closestObject;
+            Object2D* objRight = rayCastResult[i+1].closestObject;
+
+            RayHit hitAtLeftAngle = rayCastResult[i];
+            RayHit hitAtRightAngle = rayCastResult[i+1];
+
+            for(int iter = 0; iter < 10; iter++){
+                float midAngle = (angleLeft + angleRight) / 2.0f;
+                Point2D dir(cos(midAngle * DEG_TO_RAD), sin(midAngle * DEG_TO_RAD));
+                RayHit midHit = findClosestIntersection(player->getPositionCenter(), midAngle, dir);
+
+
+                if(midHit.closestObject == objLeft){
+                    hitAtLeftAngle = midHit;
+                    angleLeft = midAngle;
+                }
+                else{
+                    angleRight = midAngle;
+                    hitAtRightAngle = midHit;
+                }
+            }
+
+            float edgeAngle = (angleLeft + angleRight) * 0.5f;
+            float relativeAngle = edgeAngle - player->getDirectionGaze();
+            float screenX = tan(relativeAngle * DEG_TO_RAD) / FOV_TANGENT;
+            float positionScreanX = (screenX + 1.0f) / 2.0f * currentScreenWidth;
+
+            findEdges.push_back({positionScreanX, i, hitAtLeftAngle, hitAtRightAngle});
+            
+        }
+    }
+
+}
+
 RayHit World::findClosestIntersection(Point2D startPoint, float currentAngle, Point2D& directionVector){
     float minDistance = MAX_FLOAT;
     Object2D* closestObject = nullptr;
 
     for(int i = 0; i < arrayObjects.size();i++){
-            if(arrayObjects[i]->getObjectType() != ObjectType::Player && arrayObjects[i]->getObjectType() != ObjectType::Enemy){
+            if(ObjectTypeRules::isRayCastingTypeObject(arrayObjects[i]->getObjectType())){
                 float dist = arrayObjects[i]->intersectRay(startPoint, directionVector);
                 if(minDistance > dist && dist != -1.0f){
                     minDistance = dist;

@@ -33,3 +33,7 @@ ObjectType Object2D::getObjectType() const{
 float Object2D::getObjectHeight() const{
     return objectHeight;
 }
+
+bool Object2D::getMarkedForDeletion() const{
+    return markedForDeletion;
+}

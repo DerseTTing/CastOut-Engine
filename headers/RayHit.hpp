@@ -11,3 +11,10 @@ struct RayHit {
     Object2D* closestObject;
     bool hit;      
 };
+
+struct EdgeHit {
+    float positionScreenX;
+    int leftRayIndex;
+    RayHit hitBeforeEdge;
+    RayHit hitAfterEdge;
+};

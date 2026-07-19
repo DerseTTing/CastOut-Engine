@@ -9,17 +9,12 @@ PathFinding::PathFinding( Cell map[MAP_SIZE_Y][MAP_SIZE_X]){
     fillWalkableCell();
 }
 
-bool PathFinding::isWalkableCell(int posX, int posY) const{
-    ObjectType objT = map[posY][posX].objectType;
-    return objT != ObjectType::CircleWall && objT != ObjectType::CircleWallGenerator && objT != ObjectType::RectangleWall && objT != ObjectType::RectangleWallAround;
-}
-
 void PathFinding::fillWalkableCell(){
     walkableCell.clear();
 
     for(int y = 0; y < MAP_SIZE_Y; y++){
         for(int x = 0; x < MAP_SIZE_X; x++){
-            if(isWalkableCell(x, y))
+            if(ObjectTypeRules::isWalkable(map[y][x].objectType))
                 walkableCell.push_back(Point2D(x, y));
         }
     }
@@ -66,7 +61,7 @@ deque<Point2D> PathFinding::fillListStepToTarget(Point2D positionStartInCell, co
         int posX, posY;
         posX = (int)currentAnalysis.getX();
         posY = (int)currentAnalysis.getY() + 1;
-        if(posY < MAP_SIZE_Y && !pathMap[posY][posX].visited && isWalkableCell(posX, posY)){
+        if(posY < MAP_SIZE_Y && !pathMap[posY][posX].visited && ObjectTypeRules::isWalkable(map[posY][posX].objectType)){
             queue.push(Point2D(posX, posY));
             pathMap[posY][posX].lastPosition = currentAnalysis;
             pathMap[posY][posX].visited = true;
@@ -75,7 +70,7 @@ deque<Point2D> PathFinding::fillListStepToTarget(Point2D positionStartInCell, co
 
         posX = (int)currentAnalysis.getX();
         posY = (int)currentAnalysis.getY() - 1;
-        if(posY >= 0 && !pathMap[posY][posX].visited && isWalkableCell(posX, posY)){
+        if(posY >= 0 && !pathMap[posY][posX].visited && ObjectTypeRules::isWalkable(map[posY][posX].objectType)){
             queue.push(Point2D(posX, posY));
             pathMap[posY][posX].lastPosition = currentAnalysis;
             pathMap[posY][posX].visited = true;
@@ -84,7 +79,7 @@ deque<Point2D> PathFinding::fillListStepToTarget(Point2D positionStartInCell, co
 
         posX = (int)currentAnalysis.getX() + 1;
         posY = (int)currentAnalysis.getY();
-        if(posX < MAP_SIZE_X && !pathMap[posY][posX].visited && isWalkableCell(posX, posY)){
+        if(posX < MAP_SIZE_X && !pathMap[posY][posX].visited && ObjectTypeRules::isWalkable(map[posY][posX].objectType)){
             queue.push(Point2D(posX, posY));
             pathMap[posY][posX].lastPosition = currentAnalysis;
             pathMap[posY][posX].visited = true;
@@ -93,7 +88,7 @@ deque<Point2D> PathFinding::fillListStepToTarget(Point2D positionStartInCell, co
 
         posX = (int)currentAnalysis.getX() - 1;
         posY = (int)currentAnalysis.getY();
-        if(posX >= 0 && !pathMap[posY][posX].visited && isWalkableCell(posX, posY)){
+        if(posX >= 0 && !pathMap[posY][posX].visited && ObjectTypeRules::isWalkable(map[posY][posX].objectType)){
             queue.push(Point2D(posX, posY));
             pathMap[posY][posX].lastPosition = currentAnalysis;
             pathMap[posY][posX].visited = true;

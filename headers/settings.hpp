@@ -14,8 +14,8 @@ extern const int SCREEN_SIZE_X;
 extern const int SCREEN_SIZE_Y;
 
 // Настройки генерации карты
-inline constexpr int MAP_SIZE_X = 70;
-inline constexpr int MAP_SIZE_Y = 70;
+inline constexpr int MAP_SIZE_X = 30;
+inline constexpr int MAP_SIZE_Y = 30;
 extern const int MAP_CELL_SIZE;
 extern const int MAP_NUMBER_ROOM_DIVISIONS;
 extern const float MAP_ROOM_DIVISIONS_SKIP_PERCENT;
@@ -55,6 +55,24 @@ extern const int ENEMY_SPEED_CHASE;
 extern const sf::Color ENEMY_COLOR;
 extern const float ENEMY_FOG_DENSITY;
 
+// Настройки ключа
+extern const int KEY_COUNT;
+extern const int KEY_RADIUS;
+extern const int KEY_HEIGHT;
+extern const float KEY_PICK_UP_RADIUS;
+extern const sf::Color KEY_COLOR;
+
+// Настройки счетчика ключей
+extern const int COUNTER_KEY_TEXT_SIZE;
+extern const float COUNTER_KEY_BACKGROUND_SHARE_POSITION_X;
+extern const float COUNTER_KEY_BACKGROUND_SHARE_POSITION_Y;
+extern const float COUNTER_KEY_BACKGROUND_SHARE_SIZE_X;
+extern const float COUNTER_KEY_BACKGROUND_SHARE_SIZE_Y;
+extern const float COUNTER_KEY_TEXT_SHARE_POSITION_X;
+extern const float COUNTER_KEY_TEXT_SHARE_POSITION_Y;
+extern const sf::Color COUNTER_KEY_TEXT_COLOR;
+extern const sf::Color COUNTER_KEY_BACKGROUND_COLOR;
+
 // Настройки миникарты
 extern const float MINIMAP_SHARE_SIZE;
 extern const int MINIMAP_BOUNDED_REGION_CELL;
@@ -79,6 +97,7 @@ extern const sf::Color BACKGROUND_COLOR_NEAR_FLOOR;
 extern const sf::Color BACKGROUND_COLOR_NEAR_CEILING;
 extern const sf::Color BACKGROUND_COLOR_FAR;
 extern const sf::Color DANGER_COLOR;
+extern const sf::Color CAREFULLY_COLOR;
 
 // Настройки стамин бара
 extern const float STAMINA_BAR_SIZE_SHARE_X;
