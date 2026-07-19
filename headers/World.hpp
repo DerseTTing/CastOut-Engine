@@ -10,6 +10,7 @@
 #include "ObjectType.hpp"
 #include "RayHit.hpp"
 #include "Map.hpp"
+#include "RectangleExit.hpp"
 using namespace std;
 
 class World
@@ -22,6 +23,7 @@ class World
         void restartWorld();
         void pauseWorld();
         void resumeWorld();
+        void stopWorld();  
 
         void generationMap();
 
@@ -49,6 +51,8 @@ class World
         Map mapObj;
         Player* player;
         Enemy* enemy;
+        RectangleExit* rectangleExit;
+
         float currentScreenWidth;
         float currentScreenHeight;
 
@@ -68,6 +72,8 @@ class World
 
         int countRays;
         float stepStripX;
+
+        bool finishGame = false;
 
 
         RayHit findClosestIntersection(Point2D startPoint, float currentAngle, Point2D& directionVector);

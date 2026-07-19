@@ -104,15 +104,35 @@ void UI::minimapDrawPlayerRay(sf::RenderWindow& window, const vector<RayHit>& ra
 }
 
 void UI::minimapDrawAllObject(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, bool showHiddenObjectsOnMinimap){
+    sf::Color objectColor;
+
     for (int i = 0; i < arrayObjects.size(); i++){
-        if(ObjectTypeRules::isHiddenOnMinimapTypeObject(arrayObjects[i]->getObjectType())){
-            if(showHiddenObjectsOnMinimap)
-                arrayObjects[i]->drawOnMinimap(ENEMY_COLOR, window);
+        ObjectType type = arrayObjects[i]->getObjectType();
+
+        if(ObjectTypeRules::isHiddenOnMinimapTypeObject(type) && !showHiddenObjectsOnMinimap){
+            if(type == ObjectType::RectangleExit){
+                arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+            }
+            continue;
         }
-        else if(arrayObjects[i]->getObjectType() == ObjectType::Player)
-            arrayObjects[i]->drawOnMinimap(PLAYER_COLOR, window);
-        else
-            arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+
+        switch(type){
+            case ObjectType::Player:
+                objectColor = PLAYER_COLOR;
+                break;
+            case ObjectType::Enemy:
+                objectColor = ENEMY_COLOR;
+                break;
+            case ObjectType::RectangleExit:
+                objectColor = MINIMAP_RECTANGLE_EXIT_COLOR;
+                break;
+            default:
+                objectColor = MINIMAP_WALL_COLOR;
+                break;
+        }
+
+        arrayObjects[i]->drawOnMinimap(objectColor, window);
+
     }
 }
 
@@ -136,6 +156,21 @@ void UI::minimapDrawVisibleObject(sf::RenderWindow& window, const vector<Object2
                 circleForMinimap->setRadius(sizeCircle * MAP_CELL_SIZE / 2.0f);
                 circleForMinimap->setPositionCenter(Point2D((x + sizeCircle/2.0f) * MAP_CELL_SIZE, (y + sizeCircle/2.0f) * MAP_CELL_SIZE));
                 circleForMinimap->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+            }
+
+            if(map[y][x].objectType == ObjectType::RectangleExit ){
+                if((playerPosition - Point2D(x, y)).getLenghtVector() < MINIMAP_BOUNDED_REGION_CELL){
+                    rectangleForMinimap->setWidth(1 * MAP_CELL_SIZE);
+                    rectangleForMinimap->setLength(1 * MAP_CELL_SIZE);
+                    rectangleForMinimap->setPositionCenter(Point2D((x + 0.5f) * MAP_CELL_SIZE, (y + 0.5f) * MAP_CELL_SIZE));
+                    rectangleForMinimap->drawOnMinimap(MINIMAP_RECTANGLE_EXIT_COLOR, window);
+                }
+                else{
+                    rectangleForMinimap->setWidth(1 * MAP_CELL_SIZE);
+                    rectangleForMinimap->setLength(1 * MAP_CELL_SIZE);
+                    rectangleForMinimap->setPositionCenter(Point2D((x + 0.5f) * MAP_CELL_SIZE, (y + 0.5f) * MAP_CELL_SIZE));
+                    rectangleForMinimap->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+                }
             }
 
         }
@@ -202,8 +237,10 @@ void UI::drawStrip(sf::RenderWindow& window, const RayHit& rayHit, float positio
         sf::Color color;
         color = rayHit.closestObject->getColor();
 
-        if(enemyInChase) color = getMixingColorExpNear(color, DANGER_COLOR, factorNearEnemy, DANGER_DENSITY);
-        else if(enemyInCarefullyMode) color = getMixingColorLin(color, CAREFULLY_COLOR);
+        if(!ObjectTypeRules::isDangerColorImmuneTypeObject(rayHit.closestObject->getObjectType())){
+            if(enemyInChase) color = getMixingColorExpNear(color, DANGER_COLOR, factorNearEnemy, DANGER_DENSITY);
+            else if(enemyInCarefullyMode) color = getMixingColorLin(color, CAREFULLY_COLOR);
+        }
 
         color = getMixingColorExpFar(color, BACKGROUND_COLOR_FAR, distance, FOG_DENSITY);
 

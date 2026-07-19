@@ -12,7 +12,8 @@ enum class ObjectType
     Circle,
     Player,
     Enemy,
-    Key
+    Key,
+    RectangleExit
 
     
 };
@@ -22,7 +23,7 @@ enum class ObjectType
 namespace ObjectTypeRules{
     inline bool isWalkable(ObjectType objT){
         return objT != ObjectType::RectangleWallAround && objT != ObjectType::RectangleWall && 
-                objT != ObjectType::CircleWall && objT != ObjectType::CircleWallGenerator;
+                objT != ObjectType::CircleWall && objT != ObjectType::CircleWallGenerator && objT != ObjectType::RectangleExit;
     }
 
     inline bool isPlaceForGeneration(ObjectType objT){
@@ -30,14 +31,19 @@ namespace ObjectTypeRules{
     }
 
     inline bool isHiddenOnMinimapTypeObject(ObjectType objT){
-        return objT == ObjectType::Enemy || objT == ObjectType::Key;
+        return objT == ObjectType::Enemy || objT == ObjectType::Key || objT == ObjectType::RectangleExit;
     }
 
-    inline bool isPlayerNotCoolisionTypeObject(ObjectType objT){
-        return objT == ObjectType::Player || objT == ObjectType::Key || objT == ObjectType::Enemy;
+    inline bool isPlayerCoolisionTypeObject(ObjectType objT){
+        return objT != ObjectType::Player && objT != ObjectType::Key && objT != ObjectType::Enemy;
     }
+
     inline bool isRayCastingTypeObject(ObjectType objT){
         return objT != ObjectType::Player && objT != ObjectType::Enemy && objT != ObjectType::Key;
+    }
+
+    inline bool isDangerColorImmuneTypeObject(ObjectType objT){
+        return objT == ObjectType::RectangleExit;
     }
 
 }

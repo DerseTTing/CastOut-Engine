@@ -7,6 +7,7 @@ vector<Object2D*> Map::generationMap(){
     generationPlayer();
     generationEnemy();
     generationKey();
+    generationExit();
 
 
     return createArrayObjects();
@@ -178,6 +179,58 @@ void Map::fullRooms(){
     for(int i = 0; i < rooms.size(); i++){
         rooms[i].fullRoom(map);
     }
+}
+
+void Map::generationExit(){
+    vector<Point2D> cellForGeneration;
+    vector<Point2D> cellForGenerationReserve;
+    for(int x = 1; x < MAP_SIZE_X - 1; x++){
+        if(ObjectTypeRules::isPlaceForGeneration(map[1][x].objectType)){
+            cellForGeneration.push_back(Point2D(x, 0));
+        }
+        else if(ObjectTypeRules::isWalkable(map[1][x].objectType)){
+            cellForGenerationReserve.push_back(Point2D(x, 0));
+        }
+
+        if(ObjectTypeRules::isPlaceForGeneration(map[MAP_SIZE_Y - 2][x].objectType)){
+            cellForGeneration.push_back(Point2D(x, MAP_SIZE_Y - 1));
+        }
+        else if(ObjectTypeRules::isWalkable(map[MAP_SIZE_Y - 2][x].objectType)){
+            cellForGenerationReserve.push_back(Point2D(x, MAP_SIZE_X - 1));
+        }
+    }
+
+    for(int y = 1; y < MAP_SIZE_Y - 1; y++){
+        if(ObjectTypeRules::isPlaceForGeneration(map[y][1].objectType)){
+            cellForGeneration.push_back(Point2D(0, y));
+        }
+        else if(ObjectTypeRules::isWalkable(map[y][1].objectType)){
+            cellForGenerationReserve.push_back(Point2D(0, y));
+        }
+
+        if(ObjectTypeRules::isPlaceForGeneration(map[y][MAP_SIZE_X - 2].objectType)){
+            cellForGeneration.push_back(Point2D(MAP_SIZE_X - 1, y));
+        }
+        else if(ObjectTypeRules::isWalkable(map[y][MAP_SIZE_X - 2].objectType)){
+            cellForGenerationReserve.push_back(Point2D(MAP_SIZE_X - 1, y));
+        }
+    }
+
+
+    if(cellForGeneration.size() > 0){
+        int idCell = Random::getRandomNumber(0, cellForGeneration.size() - 1);
+        map[(int)cellForGeneration[idCell].getY()][(int)cellForGeneration[idCell].getX()].createObject = true;
+        map[(int)cellForGeneration[idCell].getY()][(int)cellForGeneration[idCell].getX()].objectType = ObjectType::RectangleExit;
+    }
+    else if(cellForGenerationReserve.size() > 0){
+        int idCell = Random::getRandomNumber(0, cellForGenerationReserve.size() - 1);
+        map[(int)cellForGenerationReserve[idCell].getY()][(int)cellForGenerationReserve[idCell].getX()].createObject = true;
+        map[(int)cellForGenerationReserve[idCell].getY()][(int)cellForGenerationReserve[idCell].getX()].objectType = ObjectType::RectangleExit;
+    }
+
+
+
+
 }
 
 void Map::generationPlayer(){
@@ -378,6 +431,10 @@ vector<Object2D*> Map::createArrayObjects(){
                 if(objectType == ObjectType::Key){
                     Key* key = new Key(position * MAP_CELL_SIZE, KEY_RADIUS, KEY_HEIGHT, KEY_COLOR, ObjectType::Key);
                     arrayObjects.push_back(key);
+                }
+                if(objectType == ObjectType::RectangleExit){
+                    RectangleExit* rectangleExit = new RectangleExit(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, RECTANGLE_EXIT_COLOR, ObjectType::RectangleExit); 
+                    arrayObjects.push_back(rectangleExit);
                 }
             }
             else

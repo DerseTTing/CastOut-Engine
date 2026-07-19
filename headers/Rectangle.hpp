@@ -5,7 +5,7 @@
 
 class Rectangle : public Object2D
 {
-    private:
+    protected:
         float width;
         float length;
 

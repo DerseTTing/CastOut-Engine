@@ -10,7 +10,7 @@
 #include "Enemy.hpp"
 #include "PathFinding.hpp"
 #include "Key.hpp"
-
+#include "RectangleExit.hpp"
 
 class Map
 {
@@ -25,6 +25,7 @@ class Map
 
         void generationWallsAround();
         void generationRooms();
+        void generationExit();
         void cutRoom(Point2D startPosition, bool horizontally, int lengthCut);
         void fixingWallNearDoor(const Point2D& positionDoor);
         vector<int> getDoorPlaces(int lengthWall);

@@ -45,6 +45,10 @@ void World::restartWorld(){
     mapObj.clearMap();
     
     generationMap();
+
+    finishGame = false;
+    resumeWorld();
+
 }
 
 void World::pauseWorld(){
@@ -66,6 +70,11 @@ void World::resumeWorld(){
     worldIsRunning = true;
 }
 
+void World::stopWorld(){
+    finishGame = true;
+    pauseWorld();
+}
+
 
 void World::generationMap(){
     arrayObjects = mapObj.generationMap();
@@ -75,6 +84,9 @@ void World::generationMap(){
             player = static_cast<Player*>(arrayObjects[i]);
         if(arrayObjects[i]->getObjectType() == ObjectType::Enemy){
             enemy = static_cast<Enemy*>(arrayObjects[i]);
+        }
+        if(arrayObjects[i]->getObjectType() == ObjectType::RectangleExit){
+            rectangleExit = static_cast<RectangleExit*>(arrayObjects[i]);
         }
     }
 
@@ -88,9 +100,9 @@ void World::processingEvent(){
         resizedEvent();
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R)
         restartWorld();
-    else if(event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Numpad7) || event.type == sf::Event::LostFocus)
+    else if((event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Numpad7) || event.type == sf::Event::LostFocus) && !finishGame)
         pauseWorld();
-    else if(event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::GainedFocus)
+    else if((event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::GainedFocus) && !finishGame)
         resumeWorld();
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && showHiddenObjectsOnMinimap)
         showHiddenObjectsOnMinimap = false;
@@ -139,7 +151,9 @@ void World::updateObjects(){
     for(int i = 0; i < arrayObjects.size(); i++){
         arrayObjects[i]->updateObject(arrayObjects, deltaTime);
     }
+
     checkDeleteObject();
+    if(rectangleExit->getFinishGame()) stopWorld();
 }
 
 void World::checkDeleteObject(){

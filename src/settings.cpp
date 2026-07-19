@@ -39,14 +39,14 @@ const float PLAYER_VIEWING_ANGLE = 90.0f;
 // Настройки врага
 const int ENEMY_RADIUS = 25;
 const int ENEMY_HEIGHT = 150;
-const int ENEMY_SPEED_SEARCH = 200;//400;
-const int ENEMY_SPEED_CHASE = 200; //310;
+const int ENEMY_SPEED_SEARCH = 400;//400;
+const int ENEMY_SPEED_CHASE = 310; //310;
 const sf::Color ENEMY_COLOR = sf::Color(171, 37, 22);
 const float ENEMY_FOG_DENSITY = 0.001f;
 
 // Настройки ключа
 const int KEY_COUNT = 5;
-const int KEY_RADIUS = 18;
+const int KEY_RADIUS = 19;
 const int KEY_HEIGHT = 150;
 const float KEY_PICK_UP_RADIUS = KEY_RADIUS + PLAYER_RADIUS - 10;
 const sf::Color KEY_COLOR = sf::Color(179, 173, 0);
@@ -62,6 +62,10 @@ const float COUNTER_KEY_TEXT_SHARE_POSITION_Y = COUNTER_KEY_BACKGROUND_SHARE_POS
 const sf::Color COUNTER_KEY_TEXT_COLOR = sf::Color::Blue;
 const sf::Color COUNTER_KEY_BACKGROUND_COLOR = sf::Color(38, 38, 38);
 
+// Настройки выхода
+const float RECTANGLE_EXIT_DISTANCE_TRIGGER_FINISH = PLAYER_RADIUS;
+const sf::Color RECTANGLE_EXIT_COLOR = sf::Color(73, 173, 50);
+
 // Настройки миникарты
 const float MINIMAP_SHARE_SIZE = 0.3f;
 const int MINIMAP_BOUNDED_REGION_CELL = 14;
@@ -69,6 +73,7 @@ const float MINIMAP_SIZE = static_cast<float>(SCREEN_SIZE_Y) * MINIMAP_SHARE_SIZ
 const float MINIMAP_OUTLINE_THICKNESS = 12.0f;
 const sf::Color MINIMAP_OUTLINE_COLOR = sf::Color(23, 23, 23);
 const sf::Color MINIMAP_WALL_COLOR = sf::Color(214, 214, 214);
+const sf::Color MINIMAP_RECTANGLE_EXIT_COLOR = sf::Color(73, 173, 50);
 const float MINIMAP_AREA_SIZE = static_cast<float>(MAP_SIZE_X * MAP_CELL_SIZE);
 const sf::Color MINIMAP_BACK_COLOR = sf::Color(38, 38, 38);
 const sf::Color MINIMAP_RAY_PLAYER_COLOR = sf::Color(15, 115, 0, 200);
@@ -109,9 +114,10 @@ const float FOV_TANGENT = tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 // Ключи на миникарте?
 // Скорость врага медленее сразу после погони
 // При высоком ЛНП высота правой границы спрайта прыгает + неполная полоска не учитывает стоящий сзади спрайт врага
+// Выход заметнее?
 // 
 //
-// звук при подборе ключа. Желтые стены
+// 
 // 
 // Ключи. Отображение их по верх экрана (как враг). Добавить апдейт обджикт сравнение на растояние с игроком. UI счетчик всех ключей(где хранить счетчик?)
 // мб сделать ключи ниже по высоте
@@ -143,6 +149,8 @@ const float FOV_TANGENT = tan(PLAYER_VIEWING_ANGLE * DEG_TO_RAD / 2.0f);
 // Спрайты ключей, которые корректно отображаются когда их много и генерацию равномерную
 // Счетчик ключей
 // Враг идет на последнюю точку ключа + желтый цвет стен
-//
-//
+// Генерация сто процентная без отстуствия важных обьектов
+// Генерация выхода
+// выход на карте который виден вблизи
+// реализация выхода и завершения игры
 //

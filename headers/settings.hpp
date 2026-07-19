@@ -14,8 +14,8 @@ extern const int SCREEN_SIZE_X;
 extern const int SCREEN_SIZE_Y;
 
 // Настройки генерации карты
-inline constexpr int MAP_SIZE_X = 30;
-inline constexpr int MAP_SIZE_Y = 30;
+inline constexpr int MAP_SIZE_X = 70;
+inline constexpr int MAP_SIZE_Y = 70;
 extern const int MAP_CELL_SIZE;
 extern const int MAP_NUMBER_ROOM_DIVISIONS;
 extern const float MAP_ROOM_DIVISIONS_SKIP_PERCENT;
@@ -73,6 +73,10 @@ extern const float COUNTER_KEY_TEXT_SHARE_POSITION_Y;
 extern const sf::Color COUNTER_KEY_TEXT_COLOR;
 extern const sf::Color COUNTER_KEY_BACKGROUND_COLOR;
 
+// Настройки выхода
+extern const float RECTANGLE_EXIT_DISTANCE_TRIGGER_FINISH;
+extern const sf::Color RECTANGLE_EXIT_COLOR;
+
 // Настройки миникарты
 extern const float MINIMAP_SHARE_SIZE;
 extern const int MINIMAP_BOUNDED_REGION_CELL;
@@ -80,6 +84,7 @@ extern const float MINIMAP_SIZE;
 extern const float MINIMAP_OUTLINE_THICKNESS;
 extern const sf::Color MINIMAP_OUTLINE_COLOR;
 extern const sf::Color MINIMAP_WALL_COLOR;
+extern const sf::Color MINIMAP_RECTANGLE_EXIT_COLOR;
 extern const float MINIMAP_AREA_SIZE;
 extern const sf::Color MINIMAP_BACK_COLOR;
 extern const sf::Color MINIMAP_WALL_COLOR;
