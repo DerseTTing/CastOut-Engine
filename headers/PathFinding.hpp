@@ -34,7 +34,7 @@ class PathFinding{
         deque<Point2D> fillListStepToTarget(Point2D positionStartInCell, const Point2D* positionTargetInCell);
 
         Point2D getRandomWalkableCell();
-        Point2D getFarWalkableCell(Point2D positionStart);
+        Point2D getFarWalkableCell(Point2D positionStartInCell);
 
         void setMap(Cell map[MAP_SIZE_Y][MAP_SIZE_X]);
 };

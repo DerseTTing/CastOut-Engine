@@ -11,7 +11,7 @@
 class Enemy : public Circle
 {
     private:
-        float speed;
+        float speed = ENEMY_SPEED_SEARCH;
         deque<Point2D> listStepToTarget;
 
         const Player* player;
@@ -29,6 +29,9 @@ class Enemy : public Circle
         bool enemyInChase = false;
         bool enemyInCarefullyMode = false;
 
+        void cheakDealsDamage();
+        bool dealsDamage = false;
+
     public:
         Enemy(const Point2D& positionCenter, float radius, float objectHeight, sf::Color color, ObjectType objectType);
         ~Enemy();
@@ -39,12 +42,14 @@ class Enemy : public Circle
 
         void drawOnMinimap(sf::Color color, sf::RenderWindow& window) const override;
 
+        void teleportToFarWalkableCell(const Point2D& positionPlayer);
+
         void setPlayer(const Player* player);
-
         void setPathFinding(PathFinding* pathFinding);
+        void setDealsDamage(bool dealsDamage);
 
-        bool getEnemyInChase();
-
-        bool getEnemyInCarefullyMode();
+        bool getEnemyInChase() const;
+        bool getEnemyInCarefullyMode() const;
+        bool getDealsDamage() const;
 
 };

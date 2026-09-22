@@ -14,8 +14,8 @@ extern const int SCREEN_SIZE_X;
 extern const int SCREEN_SIZE_Y;
 
 // Настройки генерации карты
-inline constexpr int MAP_SIZE_X = 70;
-inline constexpr int MAP_SIZE_Y = 70;
+inline constexpr int MAP_SIZE_X = 55; //70
+inline constexpr int MAP_SIZE_Y = 55;
 extern const int MAP_CELL_SIZE;
 extern const int MAP_NUMBER_ROOM_DIVISIONS;
 extern const float MAP_ROOM_DIVISIONS_SKIP_PERCENT;
@@ -31,29 +31,36 @@ extern const int ROOM_SIZE_LITTLE;
 extern const int ROOM_SIZE_MIDLE;
 
 // Настройки стен
-extern const sf::Color WALL_RECTANGLE_COLOR;
-extern const sf::Color WALL_CIRCLE_COLOR;
+extern const sf::Color WALL_COLOR;
+extern const sf::Color WALL_COLOR_AFTER_HIT;
+extern const sf::Color WALL_COLOR_AFTER_DEATH;
 extern const float WALL_HEIGHT;
 
 // Настройки игрока
 extern const sf::Color PLAYER_COLOR;
 extern const int PLAYER_RADIUS;
+extern const int PLAYER_HEALTH;
 extern const int PLAYER_SPEED;
 extern const float PLAYER_SHIFT_SPEED_MULTIPLIER;
 extern const float PLAYER_MAX_STAMINA;
+extern const float PLAYER_MAX_STAMINA_PART_AFTER_HIT;
 extern const float PLAYER_REGENERATION_STAMINA;
 extern const float PLAYER_DEGENERATION_STAMINA;
 extern const float PLAYER_PART_STAMINA_TO_SHIFT;
 extern const float PLAYER_SCREEN_ROTATION_SENSITIVITY;
 extern const float PLAYER_VIEWING_ANGLE;
+extern const float PLAYER_TIME_ROTATION_TO_ENEMY;
+extern const float PLAYER_TIME_SCREAM_TO_ENEMY;
 
 // Настройки врага
 extern const int ENEMY_RADIUS;
 extern const int ENEMY_HEIGHT;
 extern const int ENEMY_SPEED_SEARCH;
 extern const int ENEMY_SPEED_CHASE;
+extern const int ENEMY_RADIUS_DAMAGE;
 extern const sf::Color ENEMY_COLOR;
 extern const float ENEMY_FOG_DENSITY;
+extern const float ENEMY_FOG_DENSITY_AFTER_HIT;
 
 // Настройки ключа
 extern const int KEY_COUNT;
@@ -61,6 +68,9 @@ extern const int KEY_RADIUS;
 extern const int KEY_HEIGHT;
 extern const float KEY_PICK_UP_RADIUS;
 extern const sf::Color KEY_COLOR;
+extern const sf::Color KEY_COLOR_AFTER_DEATH;
+extern const float KEY_FOG_DENSITY;
+extern const float KEY_FOG_DENSITY_AFTER_HIT;
 
 // Настройки счетчика ключей
 extern const int COUNTER_KEY_TEXT_SIZE;
@@ -76,6 +86,7 @@ extern const sf::Color COUNTER_KEY_BACKGROUND_COLOR;
 // Настройки выхода
 extern const float RECTANGLE_EXIT_DISTANCE_TRIGGER_FINISH;
 extern const sf::Color RECTANGLE_EXIT_COLOR;
+extern const sf::Color RECTANGLE_EXIT_COLOR_AFTER_DEATH;
 
 // Настройки миникарты
 extern const float MINIMAP_SHARE_SIZE;
@@ -89,18 +100,22 @@ extern const float MINIMAP_AREA_SIZE;
 extern const sf::Color MINIMAP_BACK_COLOR;
 extern const sf::Color MINIMAP_WALL_COLOR;
 extern const sf::Color MINIMAP_RAY_PLAYER_COLOR;
-extern const float MINIMAP_RAY_PLAYER_THICKNESS;
 extern const float MINIMAP_CHARACTER_SIZE_MULTIPLIER;
+
 
 // Настройки Raycasting
 extern const int RAY_FREQUENCY_IN_PIXEL;
 
 // Настройка фона
 extern const float FOG_DENSITY;
+extern const float FOG_DENSITY_AFTER_HIT;
 extern const float DANGER_DENSITY;
 extern const sf::Color BACKGROUND_COLOR_NEAR_FLOOR;
+extern const sf::Color BACKGROUND_COLOR_NEAR_FLOOR_AFTER_DEATH;
 extern const sf::Color BACKGROUND_COLOR_NEAR_CEILING;
+extern const sf::Color BACKGROUND_COLOR_NEAR_CEILING_AFTER_DEATH;
 extern const sf::Color BACKGROUND_COLOR_FAR;
+extern const sf::Color BACKGROUND_COLOR_FAR_AFTER_DEATH;
 extern const sf::Color DANGER_COLOR;
 extern const sf::Color CAREFULLY_COLOR;
 

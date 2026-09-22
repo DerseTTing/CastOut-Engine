@@ -41,6 +41,8 @@ class World
 
         void updateFPS();
 
+        void cheakCatchPlayer();
+
     private:
         sf::RenderWindow window;
         sf::Event event;
@@ -72,6 +74,8 @@ class World
 
         int countRays;
         float stepStripX;
+
+        bool wasRotationToEnemyLastFrame = false;
 
         bool finishGame = false;
 

@@ -44,6 +44,21 @@ class UI
         bool enemyInChase;
         bool enemyInCarefullyMode;
 
+        bool isHiddenInterface = false;
+
+        bool isRegisterHit  = false;
+        float fogDensity = FOG_DENSITY;
+        float enemyFogDensity = ENEMY_FOG_DENSITY;
+        float keyFogDensity = KEY_FOG_DENSITY;
+        float maxStamina = PLAYER_MAX_STAMINA;
+        sf::Color wallColor = WALL_COLOR;
+        sf::Color rectangleExitColor = RECTANGLE_EXIT_COLOR;
+        sf::Color keyColor = KEY_COLOR;
+        sf::Color backgroundColorNearFloor = BACKGROUND_COLOR_NEAR_FLOOR;
+        sf::Color backgroundColorNearCeiling = BACKGROUND_COLOR_NEAR_CEILING;
+        sf::Color backgroundColorFar = BACKGROUND_COLOR_FAR;
+
+
         struct BillboardSprite {
             float leftSide;
             float rightSide;
@@ -52,7 +67,7 @@ class UI
             sf::Color color;
             bool visible = true;
         };
-  
+        
 
         void minimapChangeView(sf::RenderWindow& window);
         void minimapDrawBackground(sf::RenderWindow& window);
@@ -70,6 +85,10 @@ class UI
 
     public:
         UI();
+        void drawFrame(sf::RenderWindow& window, const float factorNearEnemy, const bool enemyInChase, const bool enemyInCarefullyMode, const vector<RayHit>& rayCastResult,
+            const vector<EdgeHit>& findEdges, const vector<Object2D*>& arrayObjects, const Player& player, const Cell (*map)[MAP_SIZE_X], bool showHiddenObjectsOnMinimap,
+            bool areaVisionMinimap, float currentStamina, bool sprintIsAvailable, float currentFPS);
+
         void drawBackground(sf::RenderWindow& window);
         void drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult, const Object2D& player, const Cell (*map)[MAP_SIZE_X], bool showHiddenObjectsOnMinimap, bool areaVisionMinimap);
         void drawRayCastResult(sf::RenderWindow& window, const vector<RayHit>& rayCastResult, const vector<EdgeHit>& findEdges);
@@ -80,4 +99,12 @@ class UI
 
         void setEnemyInfo(const float factorNearEnemy, const bool enemyInChase, const bool enemyInCarefullyMode);
         void setScreenInfo(float currentScreenWidth, float currentScreenHeight, float stepStripX);
+        void registerHit(int playerHealth);
+
+        void hideInterface();
+        void showInterface();
+
+        bool getIsHiddenInterface();
+
+        void resetInterface();
 };

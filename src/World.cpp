@@ -27,8 +27,9 @@ void World::runWorld(){
         if(worldIsRunning){
             deltaTime = clock.restart().asSeconds();
 
-            castRay(player->getPositionCenter(), player->getDirectionGaze());
             updateObjects();
+
+            castRay(player->getPositionCenter(), player->getDirectionGaze());
 
             updateFPS();
 
@@ -47,6 +48,9 @@ void World::restartWorld(){
     generationMap();
 
     finishGame = false;
+    wasRotationToEnemyLastFrame = false;
+    userInterface.resetInterface();
+    userInterface.showInterface();
     resumeWorld();
 
 }
@@ -61,6 +65,8 @@ void World::pauseWorld(){
 }
 
 void World::resumeWorld(){
+    sf::Mouse::setPosition(sf::Vector2i(currentScreenWidth/2, currentScreenHeight/2), window);
+
     if(worldIsRunning)
         return;
 
@@ -102,7 +108,7 @@ void World::processingEvent(){
         restartWorld();
     else if((event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Numpad7) || event.type == sf::Event::LostFocus) && !finishGame)
         pauseWorld();
-    else if((event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::GainedFocus) && !finishGame)
+    else if((event.type == sf::Event::MouseButtonPressed) && !finishGame)
         resumeWorld();
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V && showHiddenObjectsOnMinimap)
         showHiddenObjectsOnMinimap = false;
@@ -112,6 +118,10 @@ void World::processingEvent(){
         areaVisionMinimap = false;
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::M && !areaVisionMinimap)
         areaVisionMinimap = true;
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::K && userInterface.getIsHiddenInterface())
+        userInterface.showInterface();
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::K && !userInterface.getIsHiddenInterface())
+        userInterface.hideInterface();
 
 }
 
@@ -131,14 +141,10 @@ void World::resizedEvent(){
 void World::drawFrame(){
     window.clear();
 
-    userInterface.setEnemyInfo((player->getPositionCenter() - enemy->getPositionCenter()).getLenghtVector() - ENEMY_RADIUS, enemy->getEnemyInChase(), enemy->getEnemyInCarefullyMode());
-    userInterface.drawBackground(window);
-    userInterface.drawRayCastResult(window, rayCastResult, findEdges);
-    userInterface.drawAllSprites(window, arrayObjects, rayCastResult);
-    userInterface.drawMinimap(window, arrayObjects, rayCastResult, *player, mapObj.getMap(), showHiddenObjectsOnMinimap, areaVisionMinimap);
-    userInterface.drawStaminaBar(window, player->getStamina(), player->getSprintIsAvailable());
-    userInterface.drawCounterKey(window, *player);
-    userInterface.drawFPS(window, currentFPS);
+
+    userInterface.drawFrame(window, (player->getPositionCenter() - enemy->getPositionCenter()).getLenghtVector() - ENEMY_RADIUS, enemy->getEnemyInChase(), enemy->getEnemyInCarefullyMode(), rayCastResult, 
+    findEdges, arrayObjects, *player, mapObj.getMap(), showHiddenObjectsOnMinimap, areaVisionMinimap, player->getStamina(), player->getSprintIsAvailable(), currentFPS);
+
 
     window.display();
 }
@@ -152,8 +158,14 @@ void World::updateObjects(){
         arrayObjects[i]->updateObject(arrayObjects, deltaTime);
     }
 
+    cheakCatchPlayer();
     checkDeleteObject();
-    if(rectangleExit->getFinishGame()) stopWorld();
+    if(rectangleExit->getFinishGame() || player->getHealth() <= 0){
+        userInterface.hideInterface();
+        stopWorld();
+    } 
+    
+        
 }
 
 void World::checkDeleteObject(){
@@ -280,6 +292,20 @@ RayHit World::createRayHit(float minDistance, float currentAngle, Object2D* clos
     }
 
     return hit;
+}
+
+void World::cheakCatchPlayer(){
+    if(enemy->getDealsDamage() && !player->getIsCatchToEnemy() && !wasRotationToEnemyLastFrame){
+        player->startRotationToEnemy(enemy->getPositionCenter());
+        wasRotationToEnemyLastFrame = true;
+        userInterface.hideInterface();
+    }
+    else if(enemy->getDealsDamage() && !player->getIsCatchToEnemy()){
+        enemy->teleportToFarWalkableCell(player->getPositionCenter());
+        wasRotationToEnemyLastFrame = false;
+        userInterface.registerHit(player->getHealth());
+        userInterface.showInterface();
+    }
 }
 
 void World::updateFPS() {

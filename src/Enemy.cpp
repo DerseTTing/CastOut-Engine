@@ -2,7 +2,6 @@
 
 Enemy::Enemy(const Point2D& positionCenter, float radius, float objectHeight, sf::Color color, ObjectType objectType)
 : Circle(positionCenter, radius, objectHeight, color, objectType) {
-    speed = ENEMY_SPEED_SEARCH;
 }
 
 
@@ -17,8 +16,10 @@ void Enemy::updateObject(const vector<Object2D*>& arrayObjects, float deltaTime)
         foundNewRandomTarget();
 
 
-    if(listStepToTarget.size() != 0)
-        goToNextStep(deltaTime);       
+    if(listStepToTarget.size() != 0 && !dealsDamage)
+        goToNextStep(deltaTime);  
+        
+    cheakDealsDamage();
 }
 
 void Enemy::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{
@@ -113,6 +114,27 @@ void Enemy::foundCarefullyModeTarget(const Point2D& positionTarget){
     enemyInCarefullyMode = true;
 }
 
+void Enemy::teleportToFarWalkableCell(const Point2D& positionPlayer){
+    Point2D positionPlayerInCell = Point2D(floor(positionPlayer.getX() / MAP_CELL_SIZE), floor(positionPlayer.getY() / MAP_CELL_SIZE));
+
+    Point2D positionEnemy = pathFinding->getFarWalkableCell(positionPlayerInCell);
+    positionEnemy = Point2D((positionEnemy.getX() + 0.5f) * MAP_CELL_SIZE, (positionEnemy.getY() + 0.5f) * MAP_CELL_SIZE);
+
+    setPositionCenter(positionEnemy);
+
+    listStepToTarget.clear();
+    foundNewRandomTarget();
+
+    dealsDamage = false;
+}
+
+void Enemy::cheakDealsDamage(){
+    if((positionCenter - player->getPositionCenter()).getLenghtVector() <= ENEMY_RADIUS_DAMAGE)
+        dealsDamage = true;
+    else
+        dealsDamage = false;
+}
+
 void Enemy::setPlayer(const Player* player){
     this->player = player;
 }
@@ -121,10 +143,18 @@ void Enemy::setPathFinding(PathFinding* pathFinding){
     this->pathFinding = pathFinding;
 }
 
-bool Enemy::getEnemyInChase(){
+void Enemy::setDealsDamage(bool dealsDamage){
+    this->dealsDamage = dealsDamage;
+}
+
+bool Enemy::getEnemyInChase() const{
     return enemyInChase;
 }
 
-bool Enemy::getEnemyInCarefullyMode(){
+bool Enemy::getEnemyInCarefullyMode() const{
     return enemyInCarefullyMode;
+}
+
+bool Enemy::getDealsDamage() const{
+    return dealsDamage;
 }

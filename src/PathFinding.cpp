@@ -25,10 +25,10 @@ Point2D PathFinding::getRandomWalkableCell(){
     return walkableCell[idCell];
 }
 
-Point2D PathFinding::getFarWalkableCell(Point2D positionStart){
-    fillListStepToTarget(positionStart, nullptr);
+Point2D PathFinding::getFarWalkableCell(Point2D positionStartInCell){
+    fillListStepToTarget(positionStartInCell, nullptr);
 
-    Point2D farCell = positionStart;
+    Point2D farCell = positionStartInCell;
     int distanceFarCell = 0;
     for(int y = 0; y < MAP_SIZE_Y; y++){
         for(int x = 0; x < MAP_SIZE_X; x++){

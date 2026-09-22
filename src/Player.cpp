@@ -2,14 +2,13 @@
 
 Player::Player(const Point2D& positionCenter, float radius, float objectHeight, sf::Color color, ObjectType objectType)
     :Circle(positionCenter, radius, objectHeight, color, objectType){
-    speed = PLAYER_SPEED;
-    directionGaze = PLAYER_VIEWING_ANGLE;
-    stamina = PLAYER_MAX_STAMINA;
 }
 
 void Player::updateObject(const vector<Object2D*>& arrayObjects, float deltaTime){
-    updateStamina(deltaTime);
-    updateMovement(arrayObjects, deltaTime);
+    if(!isRotationToEnemy && !isScreamToEnemy){
+        updateStamina(deltaTime);
+        updateMovement(arrayObjects, deltaTime);
+    }
     updateRotation(mouseDelta, deltaTime);
 }
 
@@ -61,7 +60,7 @@ Point2D Player::createMoveVector(){
 void Player::updateStamina(float deltaTime){
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && sprintIsAvailable == true)
         stamina -= PLAYER_DEGENERATION_STAMINA * deltaTime;
-    else if(stamina < PLAYER_MAX_STAMINA)
+    else if(stamina < staminaMax)
         stamina += PLAYER_REGENERATION_STAMINA * deltaTime;
     
     if(stamina <= 0){
@@ -69,10 +68,10 @@ void Player::updateStamina(float deltaTime){
         sprintIsAvailable = false;
     }
 
-    if(stamina > PLAYER_MAX_STAMINA)
-        stamina = PLAYER_MAX_STAMINA;
+    if(stamina > staminaMax)
+        stamina = staminaMax;
 
-    if(stamina > PLAYER_PART_STAMINA_TO_SHIFT*PLAYER_MAX_STAMINA)
+    if(stamina > PLAYER_PART_STAMINA_TO_SHIFT * staminaMax)
         sprintIsAvailable = true;
 }
 
@@ -94,7 +93,51 @@ void Player::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{
 }
 
 void Player::updateRotation(float mouseDelta, float deltaTime){
-     setDirectionGaze(getDirectionGaze() + mouseDelta);
+
+    if(!isRotationToEnemy && !isScreamToEnemy)
+        setDirectionGaze(getDirectionGaze() + mouseDelta);
+    else if(isRotationToEnemy){
+        float directionGazeBefore = getDirectionGaze();
+        setDirectionGaze(getDirectionGaze() + angleStepRotationToEnemy * deltaTime);
+        if((targetDirectionGazeToEnemy - directionGazeBefore) * (targetDirectionGazeToEnemy - getDirectionGaze()) < 0){
+
+            setDirectionGaze(targetDirectionGazeToEnemy);
+
+            isRotationToEnemy = false;
+            currentTimeScreamToEnemy = PLAYER_TIME_SCREAM_TO_ENEMY;
+            isScreamToEnemy = true;
+        }
+    }
+    else{
+        currentTimeScreamToEnemy -= deltaTime;
+
+        if(currentTimeScreamToEnemy <= 0){
+            health -= 1;
+            stamina = staminaMax * PLAYER_MAX_STAMINA_PART_AFTER_HIT;
+            if(health > 0)
+                staminaMax = staminaMax * PLAYER_MAX_STAMINA_PART_AFTER_HIT;
+            
+            isScreamToEnemy = false;
+        }
+
+    }
+}
+
+void Player::startRotationToEnemy(const Point2D& positionEnemy){
+    isRotationToEnemy = true;
+
+    Point2D vectorPlayerToEnemy = positionEnemy - positionCenter;
+    vectorPlayerToEnemy.normalizedVector();
+    float directionGazeToEnemy = atan2(vectorPlayerToEnemy.getY(), vectorPlayerToEnemy.getX()) * RAD_TO_DEG;
+    float angleRotationToEnemy = (directionGazeToEnemy - directionGaze);
+    while(angleRotationToEnemy > 180.0f)
+        angleRotationToEnemy -= 360.0f;
+    while(angleRotationToEnemy < -180.0f)
+        angleRotationToEnemy += 360.0f;
+
+    targetDirectionGazeToEnemy = getDirectionGaze() + angleRotationToEnemy;
+    angleStepRotationToEnemy = angleRotationToEnemy / PLAYER_TIME_ROTATION_TO_ENEMY;
+
 }
 
 void Player::setDirectionGaze(float directionGaze){
@@ -117,6 +160,9 @@ void Player::setCountCollectedKey(int countCollectedKey){
     this->countCollectedKey = countCollectedKey;
 }
 
+int Player::getHealth() const{
+    return health;
+}
 
 float Player::getDirectionGaze() const{
     return directionGaze;
@@ -136,4 +182,8 @@ bool Player::getSprintIsAvailable() const{
 
 int Player::getCountCollectedKey() const{
     return countCollectedKey;
+}
+
+bool Player::getIsCatchToEnemy() const{
+    return isRotationToEnemy || isScreamToEnemy;
 }

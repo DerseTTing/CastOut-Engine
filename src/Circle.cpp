@@ -41,17 +41,17 @@ float Circle::intersectRay(Point2D startPointRay, Point2D directionVector){
     bool startInsideCircle = distToCenterSquared < radius * radius;
 
     float tca = directionVector.getX() * toCircleVector.getX() + directionVector.getY() * toCircleVector.getY();
-    if(tca < 0 && !startInsideCircle) return -1.0f; // круг целиком позади луча, и мы не внутри него
+    if(tca < 0 && !startInsideCircle) return -1.0f;
 
     float perpendicularSquared = distToCenterSquared - tca * tca;
     if(perpendicularSquared > radius * radius) return -1.0f;
 
     float thc = sqrt(radius * radius - perpendicularSquared);
-    float t1 = tca - thc; // ближняя точка (вход)
-    float t2 = tca + thc; // дальняя точка (выход)
+    float t1 = tca - thc; 
+    float t2 = tca + thc; 
 
     if(t1 >= 0) return t1;
-    if(t2 >= 0) return t2; // мы стартуем внутри круга — возвращаем точку выхода
+    if(t2 >= 0) return t2; 
     return -1.0f;
 }
 

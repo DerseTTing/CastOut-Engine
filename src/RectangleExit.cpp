@@ -7,8 +7,32 @@ RectangleExit::RectangleExit(const Point2D& positionCenter, float width, float l
 
 void RectangleExit::drawOnMinimap(sf::Color color, sf::RenderWindow& window) const{
     sf::RectangleShape rectangle;
-    rectangle.setSize(sf::Vector2f(width, length));
-    rectangle.setPosition(positionAngle.getX(), positionAngle.getY());
+
+    float extraBefore = 0.0f;
+    float extraAfter = 0.0f;
+
+    if(sizeOnMinimap.extendBefore)
+        extraBefore = MAP_CELL_SIZE;
+
+    if(sizeOnMinimap.extendAfter)
+        extraAfter = MAP_CELL_SIZE;
+
+    float drawX = positionAngle.getX();
+    float drawY = positionAngle.getY();
+    float sizeX = width;
+    float sizeY = length;
+
+    if(sizeOnMinimap.extendAlongY){
+        sizeY += extraBefore + extraAfter;
+        drawY -= extraBefore;
+    }
+    else{
+        sizeX += extraBefore + extraAfter;
+        drawX -= extraBefore;
+    }
+
+    rectangle.setSize(sf::Vector2f(sizeX, sizeY));
+    rectangle.setPosition(drawX, drawY);
     rectangle.setFillColor(color);
     window.draw(rectangle);
 }
@@ -38,6 +62,12 @@ Point2D RectangleExit::distanceToObject(Point2D point, float playerRadius){
 
 void RectangleExit::setFinishGame(bool finishGame){
     this->finishGame = finishGame;
+}
+
+void RectangleExit::setSizeOnMinimap(bool extendAlongY, bool extendBefore, bool extendAfter){
+    sizeOnMinimap.extendAlongY = extendAlongY;
+    sizeOnMinimap.extendBefore = extendBefore;
+    sizeOnMinimap.extendAfter = extendAfter;
 }
 
 bool RectangleExit::getFinishGame(){

@@ -11,8 +11,24 @@ UI::UI(){
         counterKeyText.setFillColor(COUNTER_KEY_TEXT_COLOR);
     }
 
-    rectangleForMinimap = new Rectangle(Point2D(1, 1), 1, 1, 1, WALL_RECTANGLE_COLOR, ObjectType::None);
-    circleForMinimap = new Circle(Point2D(1, 1), 1, 1, WALL_CIRCLE_COLOR, ObjectType::None);
+    rectangleForMinimap = new Rectangle(Point2D(1, 1), 1, 1, 1, wallColor, ObjectType::None);
+    circleForMinimap = new Circle(Point2D(1, 1), 1, 1, wallColor, ObjectType::None);
+}
+
+void UI::drawFrame(sf::RenderWindow& window, const float factorNearEnemy, const bool enemyInChase, const bool enemyInCarefullyMode, const vector<RayHit>& rayCastResult, 
+    const vector<EdgeHit>& findEdges, const vector<Object2D*>& arrayObjects, const Player& player, const Cell (*map)[MAP_SIZE_X], bool showHiddenObjectsOnMinimap, 
+    bool areaVisionMinimap, float currentStamina, bool sprintIsAvailable, float currentFPS){
+
+    setEnemyInfo(factorNearEnemy, enemyInChase, enemyInCarefullyMode);
+    drawBackground(window);
+    drawRayCastResult(window, rayCastResult, findEdges);
+    drawAllSprites(window, arrayObjects, rayCastResult);
+    if(!isHiddenInterface){
+        drawMinimap(window, arrayObjects, rayCastResult, player, map, showHiddenObjectsOnMinimap, areaVisionMinimap);
+        drawStaminaBar(window, currentStamina, sprintIsAvailable);
+        drawCounterKey(window, player);
+        drawFPS(window, currentFPS);
+    }
 }
 
 void UI::drawBackground(sf::RenderWindow& window){
@@ -20,16 +36,16 @@ void UI::drawBackground(sf::RenderWindow& window){
     ceilingObj.resize(4);
 
     ceilingObj[0].position = sf::Vector2f(0, 0);
-    ceilingObj[0].color = BACKGROUND_COLOR_NEAR_CEILING;
+    ceilingObj[0].color = backgroundColorNearCeiling;
     
     ceilingObj[1].position = sf::Vector2f(currentScreenWidth, 0);
-    ceilingObj[1].color = BACKGROUND_COLOR_NEAR_CEILING;
+    ceilingObj[1].color = backgroundColorNearCeiling;
     
     ceilingObj[2].position = sf::Vector2f(currentScreenWidth, currentScreenHeight / 2.0f);
-    ceilingObj[2].color = BACKGROUND_COLOR_FAR;
+    ceilingObj[2].color = backgroundColorFar;
     
     ceilingObj[3].position = sf::Vector2f(0, currentScreenHeight / 2.0f);
-    ceilingObj[3].color = BACKGROUND_COLOR_FAR;
+    ceilingObj[3].color = backgroundColorFar;
 
     window.draw(ceilingObj);
 
@@ -37,16 +53,16 @@ void UI::drawBackground(sf::RenderWindow& window){
     floorObj.resize(4);
     
     floorObj[0].position = sf::Vector2f(0, currentScreenHeight / 2.0f);
-    floorObj[0].color = BACKGROUND_COLOR_FAR;
+    floorObj[0].color = backgroundColorFar;
     
     floorObj[1].position = sf::Vector2f(currentScreenWidth, currentScreenHeight / 2.0f);
-    floorObj[1].color = BACKGROUND_COLOR_FAR;
+    floorObj[1].color = backgroundColorFar;
     
     floorObj[2].position = sf::Vector2f(currentScreenWidth, currentScreenHeight);
-    floorObj[2].color = BACKGROUND_COLOR_NEAR_FLOOR;
+    floorObj[2].color = backgroundColorNearFloor;
     
     floorObj[3].position = sf::Vector2f(0, currentScreenHeight);
-    floorObj[3].color = BACKGROUND_COLOR_NEAR_FLOOR;
+    floorObj[3].color = backgroundColorNearFloor;
 
     window.draw(floorObj);
 }
@@ -66,6 +82,7 @@ void UI::drawMinimap(sf::RenderWindow& window, const vector<Object2D*>& arrayObj
     window.setView(oldView);
 
     minimapDrawOutline(window);
+
 }
 
 void UI::minimapChangeView(sf::RenderWindow& window){
@@ -105,34 +122,34 @@ void UI::minimapDrawPlayerRay(sf::RenderWindow& window, const vector<RayHit>& ra
 
 void UI::minimapDrawAllObject(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, bool showHiddenObjectsOnMinimap){
     sf::Color objectColor;
+    Object2D* exitObj = nullptr;
 
-    for (int i = 0; i < arrayObjects.size(); i++){
+    for(int i = 0; i < arrayObjects.size(); i++){
         ObjectType type = arrayObjects[i]->getObjectType();
 
-        if(ObjectTypeRules::isHiddenOnMinimapTypeObject(type) && !showHiddenObjectsOnMinimap){
-            if(type == ObjectType::RectangleExit){
-                arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
-            }
+        if(type == ObjectType::RectangleExit){
+            exitObj = arrayObjects[i];
             continue;
         }
 
+        if(ObjectTypeRules::isHiddenOnMinimapTypeObject(type) && !showHiddenObjectsOnMinimap)
+            continue;
+
         switch(type){
-            case ObjectType::Player:
-                objectColor = PLAYER_COLOR;
-                break;
-            case ObjectType::Enemy:
-                objectColor = ENEMY_COLOR;
-                break;
-            case ObjectType::RectangleExit:
-                objectColor = MINIMAP_RECTANGLE_EXIT_COLOR;
-                break;
-            default:
-                objectColor = MINIMAP_WALL_COLOR;
-                break;
+            case ObjectType::Player: objectColor = PLAYER_COLOR; break;
+            case ObjectType::Enemy: objectColor = ENEMY_COLOR; break;
+            default: objectColor = MINIMAP_WALL_COLOR; break;
         }
 
         arrayObjects[i]->drawOnMinimap(objectColor, window);
+    }
 
+    if(exitObj){
+        bool visible = !ObjectTypeRules::isHiddenOnMinimapTypeObject(ObjectType::RectangleExit) || showHiddenObjectsOnMinimap;
+        if(visible)
+            exitObj->drawOnMinimap(MINIMAP_RECTANGLE_EXIT_COLOR, window);
+        else
+            exitObj->drawOnMinimap(MINIMAP_WALL_COLOR, window);
     }
 }
 
@@ -157,29 +174,26 @@ void UI::minimapDrawVisibleObject(sf::RenderWindow& window, const vector<Object2
                 circleForMinimap->setPositionCenter(Point2D((x + sizeCircle/2.0f) * MAP_CELL_SIZE, (y + sizeCircle/2.0f) * MAP_CELL_SIZE));
                 circleForMinimap->drawOnMinimap(MINIMAP_WALL_COLOR, window);
             }
+        }
+    }
 
-            if(map[y][x].objectType == ObjectType::RectangleExit ){
-                if((playerPosition - Point2D(x, y)).getLenghtVector() < MINIMAP_BOUNDED_REGION_CELL){
-                    rectangleForMinimap->setWidth(1 * MAP_CELL_SIZE);
-                    rectangleForMinimap->setLength(1 * MAP_CELL_SIZE);
-                    rectangleForMinimap->setPositionCenter(Point2D((x + 0.5f) * MAP_CELL_SIZE, (y + 0.5f) * MAP_CELL_SIZE));
-                    rectangleForMinimap->drawOnMinimap(MINIMAP_RECTANGLE_EXIT_COLOR, window);
-                }
-                else{
-                    rectangleForMinimap->setWidth(1 * MAP_CELL_SIZE);
-                    rectangleForMinimap->setLength(1 * MAP_CELL_SIZE);
-                    rectangleForMinimap->setPositionCenter(Point2D((x + 0.5f) * MAP_CELL_SIZE, (y + 0.5f) * MAP_CELL_SIZE));
-                    rectangleForMinimap->drawOnMinimap(MINIMAP_WALL_COLOR, window);
-                }
-            }
+    for(int i = 0; i < arrayObjects.size(); i++){
+        if(arrayObjects[i]->getObjectType() == ObjectType::RectangleExit){
+            Point2D exitCell = Point2D(floor(arrayObjects[i]->getPositionCenter().getX() / MAP_CELL_SIZE),
+                                        floor(arrayObjects[i]->getPositionCenter().getY() / MAP_CELL_SIZE));
 
+            if((playerPosition - exitCell).getLenghtVector() < MINIMAP_BOUNDED_REGION_CELL)
+                arrayObjects[i]->drawOnMinimap(MINIMAP_RECTANGLE_EXIT_COLOR, window);
+            else
+                arrayObjects[i]->drawOnMinimap(MINIMAP_WALL_COLOR, window);
+
+            break;
         }
     }
 
     circleForMinimap->setRadius(PLAYER_RADIUS * MINIMAP_CHARACTER_SIZE_MULTIPLIER);
     circleForMinimap->setPositionCenter(Point2D(player.getPositionCenter().getX(), player.getPositionCenter().getY()));
     circleForMinimap->drawOnMinimap(PLAYER_COLOR, window);
-
 }
 
 void UI::minimapDrawOutline(sf::RenderWindow& window){
@@ -236,13 +250,15 @@ void UI::drawStrip(sf::RenderWindow& window, const RayHit& rayHit, float positio
 
         sf::Color color;
         color = rayHit.closestObject->getColor();
+        if(color == WALL_COLOR) color = wallColor;
+        else if(color == RECTANGLE_EXIT_COLOR) color = rectangleExitColor;
 
         if(!ObjectTypeRules::isDangerColorImmuneTypeObject(rayHit.closestObject->getObjectType())){
             if(enemyInChase) color = getMixingColorExpNear(color, DANGER_COLOR, factorNearEnemy, DANGER_DENSITY);
             else if(enemyInCarefullyMode) color = getMixingColorLin(color, CAREFULLY_COLOR);
         }
 
-        color = getMixingColorExpFar(color, BACKGROUND_COLOR_FAR, distance, FOG_DENSITY);
+        color = getMixingColorExpFar(color, backgroundColorFar, distance, fogDensity);
 
         strip.setSize(sf::Vector2f(width, heightStrip));
         strip.setPosition(positionX, (currentScreenHeight - heightStrip)/2);
@@ -255,19 +271,20 @@ void UI::drawStrip(sf::RenderWindow& window, const RayHit& rayHit, float positio
 }
 
 void UI::drawStaminaBar(sf::RenderWindow& window, float currentStamina, bool sprintIsAvailable){
-    staminaBarBack.setSize(sf::Vector2f(currentScreenWidth * (STAMINA_BAR_SIZE_SHARE_X + STAMINA_BAR_BACKGROUND_SHARE_INDENT), currentScreenHeight * (STAMINA_BAR_SIZE_SHARE_Y + STAMINA_BAR_BACKGROUND_SHARE_INDENT)));
+    staminaBarBack.setSize(sf::Vector2f(currentScreenWidth * (STAMINA_BAR_SIZE_SHARE_X + STAMINA_BAR_BACKGROUND_SHARE_INDENT), currentScreenHeight * (STAMINA_BAR_SIZE_SHARE_Y * (maxStamina / PLAYER_MAX_STAMINA) + STAMINA_BAR_BACKGROUND_SHARE_INDENT)));
     staminaBarBack.setPosition(currentScreenWidth * STAMINA_BAR_POSITION_SHARE_X, currentScreenHeight * STAMINA_BAR_POSITION_SHARE_Y);
     staminaBarBack.setFillColor(STAMINA_BAR_BACKGROUND_COLOR);
     window.draw(staminaBarBack);
 
-    float biasPositionBar = STAMINA_BAR_SIZE_SHARE_Y * currentScreenHeight - currentScreenHeight * STAMINA_BAR_SIZE_SHARE_Y * (currentStamina / PLAYER_MAX_STAMINA);
-    staminaBar.setSize(sf::Vector2f(currentScreenWidth * STAMINA_BAR_SIZE_SHARE_X, currentScreenHeight * STAMINA_BAR_SIZE_SHARE_Y * (currentStamina / PLAYER_MAX_STAMINA)));
+    float biasPositionBar = STAMINA_BAR_SIZE_SHARE_Y * (maxStamina / PLAYER_MAX_STAMINA) * currentScreenHeight - currentScreenHeight * STAMINA_BAR_SIZE_SHARE_Y * (maxStamina / PLAYER_MAX_STAMINA) * (currentStamina / maxStamina);
+    staminaBar.setSize(sf::Vector2f(currentScreenWidth * STAMINA_BAR_SIZE_SHARE_X, currentScreenHeight * STAMINA_BAR_SIZE_SHARE_Y * (maxStamina / PLAYER_MAX_STAMINA) * (currentStamina / maxStamina)));
     staminaBar.setPosition(currentScreenWidth * (STAMINA_BAR_POSITION_SHARE_X + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2), currentScreenHeight * (STAMINA_BAR_POSITION_SHARE_Y + STAMINA_BAR_BACKGROUND_SHARE_INDENT/2) + biasPositionBar);
-    if(currentStamina / PLAYER_MAX_STAMINA > PLAYER_PART_STAMINA_TO_SHIFT || sprintIsAvailable)
+    if(currentStamina / maxStamina > PLAYER_PART_STAMINA_TO_SHIFT || sprintIsAvailable)
         staminaBar.setFillColor(STAMINA_BAR_COLOR);
     else
         staminaBar.setFillColor(STAMINA_BAR_COLOR_DEFICIENCY);
     window.draw(staminaBar);
+
 }
 
 void UI::drawCounterKey(sf::RenderWindow& window, const Player& player){
@@ -279,6 +296,7 @@ void UI::drawCounterKey(sf::RenderWindow& window, const Player& player){
     counterKeyText.setPosition(currentScreenWidth * COUNTER_KEY_TEXT_SHARE_POSITION_X, currentScreenHeight * COUNTER_KEY_TEXT_SHARE_POSITION_Y);
     counterKeyText.setString("KEY: " + to_string(static_cast<int>(player.getCountCollectedKey())) + "/" + to_string(static_cast<int>(KEY_COUNT)));
     window.draw(counterKeyText);
+
 }
 
 void UI::drawAllSprites(sf::RenderWindow& window, const vector<Object2D*>& arrayObjects, const vector<RayHit>& rayCastResult){
@@ -351,7 +369,7 @@ UI::BillboardSprite UI::createEnemySprite(sf::RenderWindow& window, const Enemy&
 
 
     sf::Color color = ENEMY_COLOR;
-    color = getMixingColorExpFar(color, BACKGROUND_COLOR_FAR, distanceToEnemy, ENEMY_FOG_DENSITY);
+    color = getMixingColorExpFar(color, backgroundColorFar, distanceToEnemy, enemyFogDensity);
 
     BillboardSprite spriteEnemy;
     spriteEnemy.leftSide = centerEnemyOnScreenX - spriteRadius;
@@ -393,8 +411,8 @@ UI::BillboardSprite UI::createKeySprite(sf::RenderWindow& window, const Key& key
     float spriteRadius = screenXRight * currentScreenWidth / 2.0f / stepStripX;
 
 
-    sf::Color color = KEY_COLOR;
-    color = getMixingColorExpFar(color, BACKGROUND_COLOR_FAR, distanceToKey, ENEMY_FOG_DENSITY);
+    sf::Color color = keyColor;
+    color = getMixingColorExpFar(color, backgroundColorFar, distanceToKey, keyFogDensity);
 
     BillboardSprite spriteKey;
     spriteKey.leftSide = centerEnemyOnScreenX - spriteRadius;
@@ -472,4 +490,50 @@ void UI::setScreenInfo(float currentScreenWidth, float currentScreenHeight, floa
     this->currentScreenWidth = currentScreenWidth;
     this->currentScreenHeight = currentScreenHeight;
     this->stepStripX = stepStripX;
+}
+
+void UI::hideInterface(){
+    isHiddenInterface = true;
+}
+
+void UI::showInterface(){
+    isHiddenInterface = false;
+}
+
+bool UI::getIsHiddenInterface(){
+    return isHiddenInterface;
+}
+
+void UI::registerHit(int playerHealth){
+    isRegisterHit = true;
+    fogDensity = FOG_DENSITY_AFTER_HIT;
+    enemyFogDensity = ENEMY_FOG_DENSITY_AFTER_HIT;
+    keyFogDensity = KEY_FOG_DENSITY_AFTER_HIT;
+    maxStamina = PLAYER_MAX_STAMINA * PLAYER_MAX_STAMINA_PART_AFTER_HIT;
+
+    if(playerHealth == 1){
+        wallColor = WALL_COLOR_AFTER_HIT;
+    }
+    else if(playerHealth == 0){
+        wallColor = WALL_COLOR_AFTER_DEATH;
+        rectangleExitColor = RECTANGLE_EXIT_COLOR_AFTER_DEATH;
+        keyColor = KEY_COLOR_AFTER_DEATH;
+        backgroundColorNearFloor = BACKGROUND_COLOR_NEAR_FLOOR_AFTER_DEATH;
+        backgroundColorNearCeiling = BACKGROUND_COLOR_NEAR_CEILING_AFTER_DEATH;
+        backgroundColorFar = BACKGROUND_COLOR_FAR_AFTER_DEATH;
+    }
+}
+
+void UI::resetInterface(){
+    isRegisterHit  = false;
+    fogDensity = FOG_DENSITY;
+    enemyFogDensity = ENEMY_FOG_DENSITY;
+    keyFogDensity = KEY_FOG_DENSITY;
+    maxStamina = PLAYER_MAX_STAMINA;
+    wallColor = WALL_COLOR;
+    rectangleExitColor = RECTANGLE_EXIT_COLOR;
+    keyColor = KEY_COLOR;
+    backgroundColorNearFloor = BACKGROUND_COLOR_NEAR_FLOOR;
+    backgroundColorNearCeiling = BACKGROUND_COLOR_NEAR_CEILING;
+    backgroundColorFar = BACKGROUND_COLOR_FAR;
 }

@@ -7,6 +7,14 @@ class RectangleExit : public Rectangle{
     private:
         bool isOpen = false;
         bool finishGame = false;
+
+        struct MinimapExtension {
+            bool extendAlongY = false;   
+            bool extendBefore = false; 
+            bool extendAfter = false;
+        };
+
+        MinimapExtension sizeOnMinimap;
     public:
         RectangleExit(const Point2D& positionCenter, float width, float length, float objectHeight, sf::Color color, ObjectType objectType);
 
@@ -17,6 +25,9 @@ class RectangleExit : public Rectangle{
         Point2D distanceToObject(Point2D point, float playerRadius) override;
 
         void setFinishGame(bool finishGame);
+        void setSizeOnMinimap(bool extendAlongY, bool extendBefore, bool extendAfter);
+
+
         bool getFinishGame();
 
 

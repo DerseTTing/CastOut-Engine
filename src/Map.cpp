@@ -273,6 +273,8 @@ void Map::generationEnemy(){
 }
 
 void Map::generationKey(){
+    if(KEY_COUNT == 0) return;
+    
     int sizeMap = max(MAP_SIZE_X, MAP_SIZE_Y);
     int keyNearArea = sizeMap / KEY_COUNT * 2;
 
@@ -357,11 +359,11 @@ vector<Object2D*> Map::createArrayObjects(){
                     Point2D position = Point2D(startX + sizeX/2.0f, y + 0.5f);
 
                     if(objectType == ObjectType::RectangleWall){
-                        Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, sizeX * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
+                        Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, sizeX * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, WALL_HEIGHT, WALL_COLOR, ObjectType::RectangleWall); 
                         arrayObjects.push_back(rectangle);
                     }
                     if(objectType == ObjectType::RectangleWallAround){
-                        Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, sizeX * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWallAround); 
+                        Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, sizeX * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, WALL_HEIGHT, WALL_COLOR, ObjectType::RectangleWallAround); 
                         arrayObjects.push_back(rectangle);
                     }
                 }
@@ -394,11 +396,11 @@ vector<Object2D*> Map::createArrayObjects(){
                 Point2D position = Point2D(x + 0.5f, startY + sizeY/2.0f);
 
                 if(objectType == ObjectType::RectangleWall){
-                    Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWall); 
+                    Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, WALL_COLOR, ObjectType::RectangleWall); 
                     arrayObjects.push_back(rectangle);
                 }
                 if(objectType == ObjectType::RectangleWallAround){
-                    Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, WALL_RECTANGLE_COLOR, ObjectType::RectangleWallAround); 
+                    Rectangle* rectangle = new Rectangle(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, WALL_COLOR, ObjectType::RectangleWallAround); 
                     arrayObjects.push_back(rectangle);
                 }
                 if(objectType == ObjectType::Player){
@@ -418,7 +420,7 @@ vector<Object2D*> Map::createArrayObjects(){
 
                     float radius = circleSize / 2.0f;
                     position = Point2D(x + radius, startY + radius);
-                    Circle* circle = new Circle(position * MAP_CELL_SIZE, radius * MAP_CELL_SIZE, WALL_HEIGHT, WALL_CIRCLE_COLOR, ObjectType::CircleWall);
+                    Circle* circle = new Circle(position * MAP_CELL_SIZE, radius * MAP_CELL_SIZE, WALL_HEIGHT, WALL_COLOR, ObjectType::CircleWall);
                     arrayObjects.push_back(circle);
                 }
                 if(objectType == ObjectType::Enemy){
@@ -433,7 +435,49 @@ vector<Object2D*> Map::createArrayObjects(){
                     arrayObjects.push_back(key);
                 }
                 if(objectType == ObjectType::RectangleExit){
-                    RectangleExit* rectangleExit = new RectangleExit(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, RECTANGLE_EXIT_COLOR, ObjectType::RectangleExit); 
+                    RectangleExit* rectangleExit = new RectangleExit(position * MAP_CELL_SIZE, 1 * MAP_CELL_SIZE, sizeY * MAP_CELL_SIZE, WALL_HEIGHT, RECTANGLE_EXIT_COLOR, ObjectType::RectangleExit);
+
+                    bool extendAlongY = (x == 0 || x == MAP_SIZE_X - 1);
+                    bool extendBefore = false;
+                    bool extendAfter = false;
+
+                    if(extendAlongY){
+                        int innerX;
+                        if(x == 0)
+                            innerX = x + 1;
+                        else
+                            innerX = x - 1;
+
+                        if(startY - 1 >= 0){
+                            if(ObjectTypeRules::isWalkable(map[startY - 1][innerX].objectType))
+                                extendBefore = true;
+                        }
+
+                        if(startY + 1 < MAP_SIZE_Y){
+                            if(ObjectTypeRules::isWalkable(map[startY + 1][innerX].objectType))
+                                extendAfter = true;
+                        }
+                    }
+                    else{
+                        int innerY;
+                        if(startY == 0)
+                            innerY = startY + 1;
+                        else
+                            innerY = startY - 1;
+
+                        if(x - 1 >= 0){
+                            if(ObjectTypeRules::isWalkable(map[innerY][x - 1].objectType))
+                                extendBefore = true;
+                        }
+
+                        if(x + 1 < MAP_SIZE_X){
+                            if(ObjectTypeRules::isWalkable(map[innerY][x + 1].objectType))
+                                extendAfter = true;
+                        }
+                    }
+
+                    rectangleExit->setSizeOnMinimap(extendAlongY, extendBefore, extendAfter);
+
                     arrayObjects.push_back(rectangleExit);
                 }
             }
